@@ -1,0 +1,22 @@
+const express = require('express');
+const chatController = require('../controllers/chatController');
+const { multerMiddleware } = require('../config/cloudinaryConfig');
+const authMiddleware = require('../middleware/authMiddleware');
+
+
+const router = express.Router();
+
+// Protected route
+router.post('/send-message', authMiddleware, multerMiddleware, chatController.sendMessage);
+router.get('/conversations', authMiddleware, chatController.getConversations);
+router.get('/conversations/:conversationId/messages', authMiddleware, chatController.getMessages);
+
+
+
+router.put('/messages/read', authMiddleware, chatController.markAsRead);
+
+
+router.delete('/messages/:messageId', authMiddleware, chatController.deleteMessage);
+
+
+module.exports = router;

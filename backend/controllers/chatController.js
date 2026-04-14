@@ -1,4 +1,3 @@
-const { response } = require('express');
 const { uploadFileToCloudinary } = require('../config/cloudinaryConfig');
 const Conversation = require('../models/Conversation');
 const response = require('../utils/responceHandler');
@@ -137,46 +136,46 @@ exports.getMessages = async (req, res) => {
   }
 };
 
-exports.markMessageAsRead = async (req, res) => {
-  const { messageId } = req.body;
+exports.markAsRead = async (req, res) => {
+  const { messageIds } = req.body;
   const userId = req.user.userId;
 
   try {
     // Get relevent message
     let message = await Message.find({
-      _id: { $in: messageId },
+      _id: { $in: messageIds },
       receiver: userId,
     });
 
     await Message.updateMany(
       {
-        _id: { $in: messageId },
+        _id: { $in: messageIds },
         receiver: userId,
       },
       { $set: { messageStatus: 'read' } },
     );
 
 
-    return response(res, 200, 'Message marked as read successfully',messages);
+    return response(res, 200, 'Message marked as read successfully', message);
 
 
 
-  } catch (error) {}
+  } catch (error) { }
 };
 
 
 
 
-exports.deleteMessage = async (req, res) => { 
+exports.deleteMessage = async (req, res) => {
   const { messageId } = req.params;
   const userId = req.user.userId;
 
   try {
-    const message = await Message.findBy(messageId);
+    const message = await Message.findById(messageId);
     if (!message) {
       return response(res, 404, 'Message not found');
     }
-      
+
     if (message.sender.toString() !== userId) {
       return response(res, 403, 'Not authorized to delete this message');
     }
