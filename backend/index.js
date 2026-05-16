@@ -6,25 +6,66 @@ const connectDB = require('./config/dbConfig');
 const bodyParser = require('body-parser');
 const authRoute = require('./routes/authRoute')
 const chatRoute = require('./routes/chatRoute')
+const http =require('http');
+const statusRoute=require('./routes/statusRoute');
+const initializeSocket = require('./services/socketService');
+
 
     dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const app = express();
 
+
+
+const corsOptions = {
+    origin: process.env.FRONTEND_URL,
+    credentials: true, 
+};
+app.use(cors(corsOptions));
+
+
+
+
+
 // Middlewares
 app.use(express.json()); //Parse body data
 app.use(cookieParser()); //Parse Tokens on every request
 app.use(bodyParser.urlencoded({ extended: true })); //Parse URL-encoded data
 
+
+
 // DATABASE CONNECTION
 connectDB();
+
+// create server
+const server = http.createServer(app);
+
+const io = initializeSocket(server);
+
+
+// apply socket middleware to all routes
+app.use((req, res, next) => {
+    req.io = io;
+    req.socketUserMap = io.socketUserMap
+    next();
+});
+
+
+
+
+
 
 
 // Routes
 app.use('/api/auth', authRoute);
 app.use('/api/chat', chatRoute);
+app.use('/api/status',statusRoute);
 
-app.listen(PORT, () => {
+
+
+
+
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
