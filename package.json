@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@contentstack/react-toastify": "^6.1.5",
+    "react-toastify": "^11.1.0"
+  }
+}
