@@ -215,7 +215,10 @@ export const Login = () => {
         formData.append('profilePicture', selectedAvatar);
       }
 
-      await updateuserProfile(formData);
+      const result = await updateuserProfile(formData);
+      if (result?.data?.user) {
+        setUser(result.data.user);
+      }
       toast.success('Welcome back to WhatsApp!');
       navigate('/');
       resetLoginState();
