@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import useLayoutStore from '../../store/layoutStore';
 import useThemeStore from '../../store/themeStore';
-import useUserStore from '../../store/useUserStore';
 import { FaPlus, FaSearch } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import formatTimestamp from '../../utils/formatTime';
 
 const ChatList = ({ contacts }) => {
   const setSelectedContact = useLayoutStore(
@@ -12,8 +12,6 @@ const ChatList = ({ contacts }) => {
   const selectedContact = useLayoutStore((state) => state.selectedContact);
 
   const { theme } = useThemeStore();
-  const { user } = useUserStore();
-
   const [searchTerms, setSearchTerms] = useState('');
 
   const filteredContacts = contacts?.filter((contact) =>
@@ -69,23 +67,45 @@ const ChatList = ({ contacts }) => {
                }`}
           >
             <img
-              src={contact?.profilePicture} 
+              src={contact?.profilePicture}
               alt={contact?.username}
-              className='w-12 h-12 rounded-full'
+              className="w-12 h-12 rounded-full"
             />
             <div className="ml-3 flex-1">
-
               <div className="flex justify-between items-baseline">
-                <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                <h2
+                  className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}
+                >
                   {contact?.username}
-                </h3>
+                </h2>
+
+                {contact?.conversation && (
+                  <span
+                    className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                  >
+                    {formatTimestamp(
+                      contact?.conversation?.lastMessage?.createdAt,
+                    )}
+                  </span>
+                )}
               </div>
 
-
+              <div className="flex justify-between items-baseline">
+                <p
+                  className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} truncate`}
+                >
+                  {contact?.conversation?.lastMessage?.content}
+                </p>
+                {contact?.conversation &&
+                  contact?.conversation?.unreadCount > 0 && (
+                    <p
+                      className={`text-sm font-semibold w-6 h-6 flex items-center justify-center bg-yellow-500 ${theme === 'dark' ? 'text-gray-800' : 'text-gray-500'} rounded-full truncate`}
+                    >
+                      {contact?.conversation?.unreadCount}
+                    </p>
+                  )}
+              </div>
             </div>
-
-
-
           </motion.div>
         ))}
       </div>

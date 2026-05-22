@@ -7,6 +7,18 @@ const response = require('../utils/responceHandler');
 const generateToken = require('../utils/generateToken');
 const Conversation = require('../models/Conversation');
 
+const normalizeUploadedUrl = (url, req) => {
+  if (!url) {
+    return null;
+  }
+
+  if (url.startsWith('/uploads/')) {
+    return `${req.protocol}://${req.get('host')}${url}`;
+  }
+
+  return url;
+};
+
 //OTP Send
 const sendOTP = async (req, res) => {
   const { phoneNumber, phoneSuffix, email } = req.body;
@@ -110,11 +122,18 @@ const updateProfile = async (req, res) => {
   const userId = req.user.userId;
   try {
     const user = await User.findById(userId);
+    if (!user) {
+      return response(res, 404, 'User not found');
+    }
+
     const file = req.file;
     if (file) {
       const uploadResult = await uploadFileToCloudinary(file);
-      console.log(uploadResult);
-      user.profilePicture = uploadResult?.secure_url;
+      console.log('update-profile upload result:', uploadResult);
+      if (!uploadResult?.secure_url) {
+        return response(res, 400, 'Failed to upload profile picture');
+      }
+      user.profilePicture = normalizeUploadedUrl(uploadResult.secure_url, req);
     } else if (req.body.profilePicture) {
       user.profilePicture = req.body.profilePicture;
     }
@@ -200,9 +219,10 @@ const getAllUsers = async (req, res) => {
             select: 'content createdAt sender receiver',
           })
           .lean();
-        return { ...user, conversation: conversation | null };
+        return { ...user, conversation: conversation || null };
       }),
     );
+    console.log(usersWithConversation);
     return response(
       res,
       200,

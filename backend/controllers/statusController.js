@@ -3,6 +3,18 @@ const Status = require('../models/Status');
 const response = require('../utils/responceHandler');
 const Message = require('../models/Message');
 
+const normalizeUploadedUrl = (url, req) => {
+  if (!url) {
+    return null;
+  }
+
+  if (url.startsWith('/uploads/')) {
+    return `${req.protocol}://${req.get('host')}${url}`;
+  }
+
+  return url;
+};
+
 exports.createStatus = async (req, res) => {
   try {
     const { content, contentType } = req.body;
@@ -18,7 +30,7 @@ exports.createStatus = async (req, res) => {
       if (!uploadFile?.secure_url) {
         return response(res, 400, 'Failed to upload media');
       }
-      mediaUrl = uploadFile?.secure_url;
+      mediaUrl = normalizeUploadedUrl(uploadFile.secure_url, req);
       if (file.mimetype.startsWith('image')) {
         finalContentType = 'image';
       } else if (file.mimetype.startsWith('video')) {

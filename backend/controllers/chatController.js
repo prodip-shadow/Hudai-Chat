@@ -3,6 +3,18 @@ const Conversation = require('../models/Conversation');
 const response = require('../utils/responceHandler');
 const Message = require('../models/Message');
 
+const normalizeUploadedUrl = (url, req) => {
+  if (!url) {
+    return null;
+  }
+
+  if (url.startsWith('/uploads/')) {
+    return `${req.protocol}://${req.get('host')}${url}`;
+  }
+
+  return url;
+};
+
 exports.sendMessage = async (req, res) => {
   try {
     const { senderId, receiverId, content, messageStatus } = req.body;
@@ -31,7 +43,7 @@ exports.sendMessage = async (req, res) => {
       if (!uploadFile?.secure_url) {
         return response(res, 400, 'Failed to upload media');
       }
-      imageOrVideoUrl = uploadFile?.secure_url;
+      imageOrVideoUrl = normalizeUploadedUrl(uploadFile.secure_url, req);
       if (file.mimetype.startsWith('image')) {
         contentType = 'image';
       } else if (file.mimetype.startsWith('video')) {
@@ -68,14 +80,14 @@ exports.sendMessage = async (req, res) => {
       .populate('receiver', 'username profilePicture');
 
     // emit socket event to receiver
-     if (req.io && req.socketUserMap) {
-       const receiverSocketId = req.socketUserMap.get(receiverId);
-       if (receiverSocketId) {
-         req.io.to(receiverSocketId).emit('receive_message', populatedMessage);
-         message.messageStatus = 'delivered';
-          await message.save();
-       }
-     }
+    if (req.io && req.socketUserMap) {
+      const receiverSocketId = req.socketUserMap.get(receiverId);
+      if (receiverSocketId) {
+        req.io.to(receiverSocketId).emit('receive_message', populatedMessage);
+        message.messageStatus = 'delivered';
+        await message.save();
+      }
+    }
 
     return response(res, 200, 'Message sent successfully', populatedMessage);
   } catch (error) {
@@ -173,8 +185,7 @@ exports.markAsRead = async (req, res) => {
           const updatedMessage = {
             _id: message._id,
             messageStatus: 'read',
-
-          }
+          };
 
           req.io.to(senderSocketId).emit('message_read', updatedMessage);
           await message.save();
@@ -183,11 +194,8 @@ exports.markAsRead = async (req, res) => {
     }
 
     return response(res, 200, 'Message marked as read successfully', message);
-  } catch (error) { }
+  } catch (error) {}
 };
-
-
-
 
 exports.deleteMessage = async (req, res) => {
   const { messageId } = req.params;
@@ -207,17 +215,17 @@ exports.deleteMessage = async (req, res) => {
 
     //   emit socket events
     if (req.io && req.socketUserMap) {
-      const receiverSocketId = req.socketUserMap.get(message.receiver.toString());
+      const receiverSocketId = req.socketUserMap.get(
+        message.receiver.toString(),
+      );
       if (receiverSocketId) {
         req.io.to(receiverSocketId).emit('message_deleted', messageId);
       }
     }
-
-
 
     return response(res, 200, 'Message deleted successfully');
   } catch (error) {
     console.error(error);
     return response(res, 500, 'Server error');
   }
-}
+};
