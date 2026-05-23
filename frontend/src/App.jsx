@@ -11,24 +11,33 @@ import Status from './pages/StatusSection/Status.jsx';
 import Setting from './pages/SettingSection/Setting.jsx';
 import useUserStore from './store/useUserStore.js';
 import { disconnectSocket, initializeSocket } from './services/chat.service.js';
+import { useChatStore } from './store/chatStore.js';
 
 const App = () => {
 
   const { user } = useUserStore();
+  const { setCurrentUser, initsocketListners, cleanUP } = useChatStore();
   
   useEffect(() => {
     if (user._id) {
       const socket = initializeSocket();
 
+
+      if (socket) { 
+        setCurrentUser(user); 
+        initsocketListners(socket);
+      }
+
     }
     
     return () => { 
+      cleanUP();
       disconnectSocket();
     }
 
 
 
-  },[user]);
+  },[cleanUP, initsocketListners, setCurrentUser, user]);
 
 
   return (

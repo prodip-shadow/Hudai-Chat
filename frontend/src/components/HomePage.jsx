@@ -27,7 +27,6 @@ const HomePage = () => {
         getAllUser();
     }, []);
 
-    console.log(allUsers);
 
 
     return (

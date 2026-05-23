@@ -14,7 +14,7 @@ export const useChatStore = create((set, get) => ({
 
   // socket event listener setup
 
-  initializeSocketListeners: () => {
+  initsocketListners: () => {
     const socket = getSocket();
     if (!socket) return;
 
@@ -158,7 +158,7 @@ export const useChatStore = create((set, get) => ({
             const { data } = await axiosInstance.get('/chats/conversations');
             set({ conversations: data, loading: false });
 
-            get().initializeSocketListeners();
+            get().initsocketListners();
             return data;
         } catch (error) {
             set({ 
