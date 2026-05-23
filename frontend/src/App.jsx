@@ -19,7 +19,7 @@ const App = () => {
   const { setCurrentUser, initsocketListners, cleanUP } = useChatStore();
   
   useEffect(() => {
-    if (user._id) {
+    if (user?._id) {
       const socket = initializeSocket();
 
 

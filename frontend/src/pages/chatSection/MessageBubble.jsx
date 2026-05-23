@@ -5,6 +5,10 @@ import { HiDotsVertical } from 'react-icons/hi';
 import useOutsideClick from '../../hooks/useOutsideclick';
 import EmojiPicker from 'emoji-picker-react';
 import { RxCross2 } from 'react-icons/rx';
+import { IoTrashBin } from 'react-icons/io5';
+
+
+
 
 const MessageBubble = ({
   message,
@@ -13,7 +17,7 @@ const MessageBubble = ({
   onReact,
   deleteMessage,
 }) => {
-  console.log('Rendering MessageBubble for message:', message);
+  // console.log('Rendering MessageBubble for message:', message);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -190,11 +194,24 @@ const MessageBubble = ({
                 }
                 setShowOptions(false);
               }}
-              className='flex items-center w-full px-4 py-2 gap-3 rounded-lg '
+              className="flex items-center w-full px-4 py-2 gap-3 rounded-lg "
             >
               <FaRegCopy className="" size={14} />
               <span>Copy</span>
             </button>
+
+            {isUserMessage && (
+              <button
+                onClick={() => {
+                  deleteMessage(message._id);
+                  setShowOptions(false);
+                }}
+                className="flex items-center w-full px-4 py-2 gap-3 rounded-lg text-red-600 "
+              >
+                <IoTrashBin className="text-red-600" size={14} />
+                <span>Delete</span>
+              </button>
+            )}
           </div>
         )}
       </div>
