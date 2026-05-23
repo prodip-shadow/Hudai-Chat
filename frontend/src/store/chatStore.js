@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { getSocket } from '../services/chat.service';
 import axiosInstance from '../services/url.service';
+import useUserStore from './useUserStore';
 
 export const useChatStore = create((set, get) => ({
   conversations: [],
@@ -23,8 +24,10 @@ export const useChatStore = create((set, get) => ({
     socket.off('user_typing');
     socket.off('user_status');
     socket.off('message_send');
+    socket.off('message_status');
     socket.off('message_error');
     socket.off('message_deleted');
+    socket.off('reaction_update');
 
     // listen for incoming messages
     socket.on('receive_message', (message) => {});
@@ -404,15 +407,15 @@ export const useChatStore = create((set, get) => ({
 
     // add/change reactions
 
-    addReaction: async ({ messageId, emoji }) => { 
+    addReaction: async ({ messageId, emoji }) => {
         const socket = getSocket();
-        const { currentUser } = get();
-        if (socket && currentUser) { 
+        const currentUser = useUserStore.getState().user;
+        if (socket && currentUser) {
             socket.emit('add_reaction', {
                 messageId,
-                emoji, 
-                userId: currentUser?._id
-            })
+                emoji,
+                userId: currentUser._id,
+            });
         }
     },
 

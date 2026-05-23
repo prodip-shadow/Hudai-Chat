@@ -125,7 +125,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
       formData.append('senderId', user?._id);
       formData.append('receiverId', selectedContact?._id);
 
-      const status = online ? 'delivered' : 'sent';
+      const status = online ? 'delivered' : 'send';
 
       formData.append('messageStatus', status);
       if (message.trim()) {
@@ -138,7 +138,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
       }
       if (!message.trim() && !selectedFile) return;
 
-      await sendMessage({formData});
+      await sendMessage({ formData });
 
       // clear status
       setMessage('');
@@ -195,7 +195,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
     : {};
 
   const handleReaction = async (messageId, emoji) => {
-    addReaction(messageId, emoji);
+    addReaction({ messageId, emoji });
   };
 
   if (!selectedContact) {
@@ -409,10 +409,8 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
           onClick={handleSendMessage}
           className="bg-green-500 text-white p-2 focus:outline-none rounded-full hover:bg-green-600 transition-colors"
         >
-          <FaPaperPlane className='h-5 w-5' />
+          <FaPaperPlane className="h-5 w-5" />
         </button>
-
-
       </div>
     </div>
   );

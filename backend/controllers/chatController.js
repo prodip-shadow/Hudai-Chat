@@ -143,7 +143,7 @@ exports.getMessages = async (req, res) => {
       {
         conversation: conversationId,
         receiver: userId,
-        messageStatus: { $in: ['sent', 'delivered'] },
+        messageStatus: { $in: ['send', 'sent', 'delivered'] },
       },
       { $set: { messageStatus: 'read' } },
     );
