@@ -3,26 +3,26 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-
-const transporter=nodemailer.createTransport({
-    service:'gmail',
-    auth:{
-        user:process.env.EMAIL_USER,
-        pass:process.env.EMAIL_PASS
-    }
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
-
-transporter.verify((error,success)=>{
-    if(error){
-        console.log('Gmail Services connnection failed');
-    }else{
-        console.log('Email service is ready to send messages');
-    }
+transporter.verify((error, success) => {
+  if (error) {
+    console.log('Gmail Services connnection failed');
+  } else {
+    console.log('Email service is ready to send messages');
+  }
 });
 
 const sendOtpToEmail = async (email, otp) => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
       <h2 style="color: #075e54;">🔐 WhatsApp Web Verification</h2>
       
@@ -45,15 +45,13 @@ const sendOtpToEmail = async (email, otp) => {
       <small style="color: #777;">This is an automated message. Please do not reply.</small>
     </div>
   `;
-    
-    await transporter.sendMail({
-        from:`WhatsApp Web <${process.env.EMAIL_USER}>`,
-        to:email,
-        subject:'Your WhatsApp Web OTP Verification Code',
-        html
-    });
 
-}
+  await transporter.sendMail({
+    from: `WhatsApp Web <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Your WhatsApp Web OTP Verification Code',
+    html,
+  });
+};
 
-
-module.exports={sendOtpToEmail};
+module.exports = { sendOtpToEmail };
