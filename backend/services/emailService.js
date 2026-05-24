@@ -4,12 +4,16 @@ const dns = require('dns');
 
 dotenv.config();
 
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: Number(process.env.SMTP_PORT || 587),
+  port: Number(process.env.SMTP_PORT || 465),
   secure:
     process.env.SMTP_SECURE === 'true' ||
-    Number(process.env.SMTP_PORT || 587) === 465,
+    Number(process.env.SMTP_PORT || 465) === 465,
   family: 4,
   lookup(hostname, options, callback) {
     return dns.lookup(hostname, { ...options, family: 4 }, callback);
@@ -22,11 +26,16 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
   tls: {
+    servername: process.env.SMTP_HOST || 'smtp.gmail.com',
     rejectUnauthorized: false,
   },
 });
 
-if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+if (
+  process.env.EMAIL_USER &&
+  process.env.EMAIL_PASS &&
+  process.env.VERIFY_EMAIL_SERVICE === 'true'
+) {
   transporter.verify((error) => {
     if (error) {
       console.log('Gmail Services connnection failed');
@@ -36,9 +45,7 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     }
   });
 } else {
-  console.log(
-    'Email service skipped verification because EMAIL_USER or EMAIL_PASS is missing',
-  );
+  console.log('Email service verification skipped');
 }
 
 const sendOtpToEmail = async (email, otp) => {
