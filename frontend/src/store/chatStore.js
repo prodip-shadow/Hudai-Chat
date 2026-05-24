@@ -280,13 +280,25 @@ export const useChatStore = create((set, get) => ({
 
             const messageData = data.data || data;
 
-            // replace optimist message with actual message from server
+            // replace optimistic message with actual message from server
             set((state) => ({
                 messages: state.messages.map((msg) =>
                     msg._id === tempId ? messageData : msg
-                )
+                ),
+                // update ChatList with new lastMessage in real-time for the sender
+                contacts: state.contacts.map((contact) =>
+                    contact._id === receiverId
+                        ? {
+                              ...contact,
+                              conversation: {
+                                  ...contact.conversation,
+                                  lastMessage: messageData,
+                                  unreadCount: 0,
+                              },
+                          }
+                        : contact
+                ),
             }));
-
 
             return messageData;
         } catch (error) {

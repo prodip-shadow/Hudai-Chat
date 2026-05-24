@@ -62,6 +62,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
   const isTyping = isUserTyping(selectedContact?._id);
 
   useEffect(() => {
+    isInitialLoadRef.current = true;
     if (selectedContact?._id && conversations?.data?.length > 0) {
       const conversation = conversations?.data?.find((conv) =>
         conv.participants.some(
@@ -78,12 +79,19 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
     fetchConversations();
   }, []);
 
-  const scrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  const isInitialLoadRef = useRef(true);
+
+  const scrollToBottom = (smooth = false) => {
+    messageEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (isInitialLoadRef.current) {
+      scrollToBottom(false);
+      isInitialLoadRef.current = false;
+    } else {
+      scrollToBottom(true);
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -280,7 +288,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
       </div>
 
       <div
-        className={`flex-1 min-h-0 p-4 overflow-y-auto ${theme === 'dark' ? 'bg-[#191a1a]' : 'bg-[rgb(241,236,229)]'}`}
+        className={`flex-1 min-h-0 p-4 overflow-y-auto overscroll-contain ${theme === 'dark' ? 'bg-[#191a1a]' : 'bg-[rgb(241,236,229)]'}`}
       >
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <React.Fragment key={date}>

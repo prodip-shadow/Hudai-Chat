@@ -35,7 +35,7 @@ export const Layout = ({
 
   return (
     <div
-      className={`h-screen overflow-hidden ${theme === 'dark' ? 'bg-[#111b21] text-white' : 'bg-white text-gray-900'} flex`}
+      className={`h-dvh overflow-hidden ${theme === 'dark' ? 'bg-[#111b21] text-white' : 'bg-white text-gray-900'} flex`}
     >
       {!isMobile && <Sidebar />}
       <div className="flex-1 flex overflow-hidden">
@@ -46,7 +46,7 @@ export const Layout = ({
               initial={{ x: isMobile ? '-100%' : 0 }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'tween' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className={`w-full md:w-2/5 h-full flex flex-col ${isMobile ? 'pb-14' : ''}`}
             >
               {children}
@@ -59,7 +59,7 @@ export const Layout = ({
               initial={{ x: isMobile ? '100%' : 0 }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'tween' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="w-full h-full"
             >
               <ChatWindow

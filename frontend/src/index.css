@@ -1,2 +1,18 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* Use dynamic viewport height so mobile browser chrome (address bar) doesn't
+   push content out of view when it appears/disappears on scroll */
+.h-dvh {
+  height: 100dvh;
+}
+
+/* Prevent rubber-band / overscroll on the root so only inner divs scroll */
+html, body {
+  overflow: hidden;
+  height: 100%;
+}
+
+#root {
+  height: 100%;
+}
