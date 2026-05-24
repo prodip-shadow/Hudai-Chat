@@ -7,11 +7,11 @@ const sendOtpToEmail = async (email, otp) => {
 
   const html = `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-      <h2 style="color: #075e54;">Mernok Verification</h2>
+      <h2 style="color: #075e54;">Mernoc Verification</h2>
 
       <p>Hi there,</p>
 
-      <p>Your one-time password (OTP) to verify your Mernok account is:</p>
+      <p>Your one-time password (OTP) to verify your Mernoc account is:</p>
 
       <h1 style="background: #e0f7fa; color: #000; padding: 10px 20px; display: inline-block; border-radius: 5px; letter-spacing: 2px;">
         ${otp}
@@ -21,7 +21,7 @@ const sendOtpToEmail = async (email, otp) => {
 
       <p>If you didn't request this OTP, please ignore this email.</p>
 
-      <p style="margin-top: 20px;">Thanks & Regards,<br/>Mernok Security Team</p>
+      <p style="margin-top: 20px;">Thanks & Regards,<br/>Mernoc Security Team</p>
 
       <hr style="margin: 30px 0;" />
 
@@ -32,7 +32,7 @@ const sendOtpToEmail = async (email, otp) => {
   const payload = JSON.stringify({
     sender: { email: process.env.EMAIL_SENDER },
     to: [{ email }],
-    subject: 'Your Mernok OTP Verification Code',
+    subject: 'Your Mernoc OTP Verification Code',
     htmlContent: html,
   });
 
