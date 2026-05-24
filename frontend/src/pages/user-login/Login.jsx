@@ -63,6 +63,7 @@ export const Login = () => {
   const navigate = useNavigate();
   const { setUser } = useUserStore();
   const { theme } = useThemeStore();
+  // eslint-disable-next-line no-unused-vars
   const dark = theme === 'dark';
 
   const { register: loginRegister, handleSubmit: handleLoginSubmit, formState: { errors: loginErrors } } =
@@ -211,10 +212,10 @@ export const Login = () => {
           key={s}
           className={`rounded-full transition-all duration-300 ${
             s === step
-              ? 'w-5 h-2 bg-green-500'
+              ? 'w-7 h-2 bg-white'
               : s < step
-              ? 'w-2 h-2 bg-green-400'
-              : `w-2 h-2 ${dark ? 'bg-white/20' : 'bg-gray-200'}`
+              ? 'w-2 h-2 bg-white/60'
+              : 'w-2 h-2 bg-white/25'
           }`}
         />
       ))}
@@ -222,37 +223,48 @@ export const Login = () => {
   );
 
   const slideVariants = {
-    initial: { opacity: 0, x: 20 },
+    initial: { opacity: 0, x: 24 },
     animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 },
+    exit: { opacity: 0, x: -24 },
   };
 
-  return (
-    <div className={`min-h-screen flex items-center justify-center p-4 ${dark ? 'bg-[#111b21]' : 'bg-[#f0f2f5]'}`}>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={`w-full max-w-sm rounded-2xl shadow-xl overflow-hidden ${dark ? 'bg-[#202c33] text-white' : 'bg-white text-gray-900'}`}
-      >
-        {/* Top bar */}
-        <div className="bg-green-500 px-6 pt-8 pb-6 text-center">
-          <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <img src={Logo} alt="Logo" className="w-9 h-9" />
-          </div>
-          <h1 className="text-xl font-bold text-white">Hudai Chat</h1>
-          <p className="text-green-100 text-sm mt-0.5">
-            {step === 1 ? 'Sign in to continue' : step === 2 ? 'Verify your identity' : 'Set up your profile'}
-          </p>
-        </div>
+  const glassInput = `flex items-center gap-3 bg-white/95 rounded-2xl px-4 py-3.5 transition-all ring-2 ring-transparent focus-within:ring-white/80 shadow-sm`;
+  const inputInner = `flex-1 bg-transparent outline-none text-sm text-black `;
+  const primaryBtn = `w-full py-3.5 rounded-2xl text-sm font-bold tracking-wide transition-all flex items-center justify-center bg-white hover:bg-gray-50 shadow-lg disabled:opacity-50`;
 
-        <div className="px-6 py-5">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-300 via-green-800 to-blue-00 flex flex-col">
+
+      {/* ── Brand area ── */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="flex flex-col items-center pt-16 pb-6 px-6 text-center"
+      >
+        <div className="w-20 h-20 bg-white/15 border-2 border-white/30 rounded-3xl flex items-center justify-center mb-5 shadow-2xl backdrop-blur-sm">
+          <img src={Logo} alt="Logo" className="w-12 h-12" />
+        </div>
+        <h1 className="text-4xl font-extrabold text-white tracking-tight">Merno</h1>
+        <p className="text-white/55 text-sm mt-2 font-medium">
+          {step === 1 ? 'Sign in to your account' : step === 2 ? 'Verify your identity' : 'Complete your profile'}
+        </p>
+      </motion.div>
+
+      {/* ── Form panel ── */}
+      <div className="flex-1 flex flex-col items-center px-5 pb-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.1, ease: 'easeOut' }}
+          className="w-full max-w-sm bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-7 shadow-2xl"
+        >
           <StepDots />
 
           {error && (
-            <p className="text-red-500 text-sm text-center mb-4 bg-red-50 dark:bg-red-900/20 rounded-lg py-2 px-3">
+            <div className="text-sm text-center mb-5 rounded-2xl py-3 px-4 bg-red-500/20 border border-red-400/30 text-red-100">
               {error}
-            </p>
+            </div>
           )}
 
           <AnimatePresence mode="wait">
@@ -264,12 +276,12 @@ export const Login = () => {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.2 }}
-                className="space-y-3"
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="space-y-4"
                 onSubmit={handleLoginSubmit(onLoginSubmit)}
               >
-                <p className={`text-xl text-center mb-1 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Enter your  email to receive an OTP
+                <p className="text-white/65 text-sm text-center">
+                  Enter your email to receive an OTP
                 </p>
 
                 {/* Phone row */}
@@ -343,26 +355,24 @@ export const Login = () => {
 
                 {/* Email row */}
                 <div>
-                  <div className={`flex items-center gap-2 border rounded-xl px-3 py-2.5 transition-all ${
-                    dark ? 'bg-white/5 border-white/10 focus-within:border-green-500' : 'bg-gray-50 border-gray-200 focus-within:border-green-500'
-                  } ${loginErrors.email ? 'border-red-400' : ''}`}>
-                    <MdEmail className="text-gray-400 shrink-0" size={16} />
+                  <div className={`${glassInput} ${loginErrors.email ? 'ring-red-400' : ''}`}>
+                    <MdEmail className="text-gray-400 shrink-0" size={18} />
                     <input
                       type="email"
                       {...loginRegister('email')}
                       value={email}
                       placeholder="Email address"
                       onChange={e => setEmail(e.target.value)}
-                      className={`flex-1 bg-transparent outline-none text-sm ${dark ? 'text-white placeholder-gray-500' : 'text-gray-900 placeholder-gray-400'}`}
+                      className={inputInner}
                     />
                   </div>
-                  {loginErrors.email && <p className="text-red-400 text-xs mt-1">{loginErrors.email.message}</p>}
+                  {loginErrors.email && <p className="text-red-300 text-xs mt-1.5 ml-1">{loginErrors.email.message}</p>}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 flex items-center justify-center mt-1"
+                  className={`${primaryBtn} text-[#006b3c]`}
                 >
                   {loading ? <Spinner /> : 'Send OTP'}
                 </button>
@@ -377,13 +387,13 @@ export const Login = () => {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.2 }}
-                className="space-y-4"
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="space-y-5"
                 onSubmit={handleOtpSubmit(onOtpSubmit)}
               >
-                <p className={`text-xs text-center ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p className="text-white/65 text-sm text-center leading-relaxed">
                   Enter the 6-digit code sent to{' '}
-                  <span className="font-medium">
+                  <span className="text-white font-semibold">
                     {userPhoneData?.email || `${userPhoneData?.phoneSuffix} ${userPhoneData?.phoneNumber}`}
                   </span>
                 </p>
@@ -401,20 +411,22 @@ export const Login = () => {
                       onChange={e => handleOtpChange(i, e.target.value)}
                       onKeyDown={e => handleOtpKeyDown(i, e)}
                       onPaste={i === 0 ? handleOtpPaste : undefined}
-                      className={`w-11 h-12 text-center text-lg font-semibold rounded-xl border outline-none transition-all
-                        ${otpErrors.otp ? 'border-red-400' : dark
-                          ? 'bg-white/5 border-white/10 text-white focus:border-green-500 focus:bg-white/10'
-                          : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-green-500 focus:bg-white'
-                        }`}
+                      className={`w-11 h-13 text-center text-xl font-bold rounded-2xl outline-none transition-all shadow-sm ${
+                        otpErrors.otp
+                          ? 'bg-red-100 ring-2 ring-red-400 text-red-700'
+                          : digit
+                          ? 'bg-white ring-2 ring-white/80 text-[#006b3c]'
+                          : 'bg-white/90 ring-2 ring-transparent focus:ring-white/80 text-gray-800'
+                      }`}
                     />
                   ))}
                 </div>
-                {otpErrors.otp && <p className="text-red-400 text-xs text-center">{otpErrors.otp.message}</p>}
+                {otpErrors.otp && <p className="text-red-300 text-xs text-center">{otpErrors.otp.message}</p>}
 
                 <button
                   type="submit"
                   disabled={loading || otp.join('').length < 6}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 flex items-center justify-center"
+                  className={`${primaryBtn} text-[#006b3c]`}
                 >
                   {loading ? <Spinner /> : 'Verify OTP'}
                 </button>
@@ -422,11 +434,9 @@ export const Login = () => {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className={`w-full py-2 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 ${
-                    dark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'
-                  }`}
+                  className="w-full py-3 rounded-2xl text-sm font-medium text-white/60 hover:text-white transition-colors flex items-center justify-center gap-2 border border-white/15 hover:border-white/30"
                 >
-                  <FaArrowLeft size={12} />
+                  <FaArrowLeft size={11} />
                   Go back
                 </button>
               </motion.form>
@@ -440,28 +450,28 @@ export const Login = () => {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
                 className="space-y-4"
                 onSubmit={handleProfileSubmit(onProfileSubmit)}
               >
                 {/* Avatar picker */}
                 <div className="flex flex-col items-center">
-                  <div className="relative w-20 h-20 mb-3">
+                  <div className="relative w-22 h-22 mb-4">
                     <img
                       src={profilePicture ? URL.createObjectURL(profilePicture) : selectedAvatar}
                       alt="profile"
-                      className="w-full h-full object-cover rounded-full ring-2 ring-green-500/30"
+                      className="w-22 h-22 object-cover rounded-full ring-4 ring-white/40 shadow-xl"
                     />
                     <label
                       htmlFor="profile-picture"
-                      className="absolute bottom-0 right-0 bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full cursor-pointer transition-colors"
+                      className="absolute bottom-0.5 right-0.5 bg-white text-[#006b3c] hover:bg-gray-100 p-2 rounded-full cursor-pointer transition-colors shadow-lg"
                     >
-                      <FaPlus size={10} />
+                      <FaPlus size={9} />
                     </label>
                     <input type="file" id="profile-picture" className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
 
-                  <p className={`text-xs mb-2 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>Or choose an avatar</p>
+                  <p className="text-white/50 text-xs mb-3">Or choose an avatar</p>
                   <div className="flex gap-2 flex-wrap justify-center">
                     {avatars.map((a, i) => (
                       <img
@@ -469,8 +479,10 @@ export const Login = () => {
                         src={a}
                         alt=""
                         onClick={() => setSelectedAvatar(a)}
-                        className={`w-10 h-10 rounded-full cursor-pointer transition-all hover:scale-110 ${
-                          selectedAvatar === a && !profilePicture ? 'ring-2 ring-green-500 scale-110' : 'opacity-70 hover:opacity-100'
+                        className={`w-11 h-11 rounded-full cursor-pointer transition-all hover:scale-110 ${
+                          selectedAvatar === a && !profilePicture
+                            ? 'ring-3 ring-white scale-110 shadow-lg'
+                            : 'opacity-55 hover:opacity-90'
                         }`}
                       />
                     ))}
@@ -479,18 +491,16 @@ export const Login = () => {
 
                 {/* Username */}
                 <div>
-                  <div className={`flex items-center gap-2 border rounded-xl px-3 py-2.5 transition-all ${
-                    dark ? 'bg-white/5 border-white/10 focus-within:border-green-500' : 'bg-gray-50 border-gray-200 focus-within:border-green-500'
-                  } ${profileErrors.username ? 'border-red-400' : ''}`}>
+                  <div className={`${glassInput} ${profileErrors.username ? 'ring-red-400' : ''}`}>
                     <FaUser className="text-gray-400 shrink-0" size={13} />
                     <input
                       {...profileRegister('username')}
                       type="text"
-                      placeholder="Your name"
-                      className={`flex-1 bg-transparent outline-none text-sm ${dark ? 'text-white placeholder-gray-500' : 'text-gray-900 placeholder-gray-400'}`}
+                      placeholder="Your display name"
+                      className={inputInner}
                     />
                   </div>
-                  {profileErrors.username && <p className="text-red-400 text-xs mt-1">{profileErrors.username.message}</p>}
+                  {profileErrors.username && <p className="text-red-300 text-xs mt-1.5 ml-1">{profileErrors.username.message}</p>}
                 </div>
 
                 {/* Terms */}
@@ -499,27 +509,27 @@ export const Login = () => {
                     type="checkbox"
                     id="agreed"
                     {...profileRegister('agreed')}
-                    className="mt-0.5 accent-green-500 cursor-pointer"
+                    className="mt-0.5 accent-white cursor-pointer"
                   />
-                  <label htmlFor="agreed" className={`text-xs cursor-pointer ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <label htmlFor="agreed" className="text-xs cursor-pointer leading-relaxed text-white/60">
                     I agree to the{' '}
-                    <a href="#" className="text-green-500 underline underline-offset-2">Terms and Conditions</a>
+                    <a href="#" className="text-white underline underline-offset-2 hover:text-white/80">Terms and Conditions</a>
                   </label>
                 </div>
-                {profileErrors.agreed && <p className="text-red-400 text-xs">{profileErrors.agreed.message}</p>}
+                {profileErrors.agreed && <p className="text-red-300 text-xs">{profileErrors.agreed.message}</p>}
 
                 <button
                   type="submit"
                   disabled={!watch('agreed') || loading}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 flex items-center justify-center"
+                  className={`${primaryBtn} text-[#006b3c]`}
                 >
                   {loading ? <Spinner /> : 'Create Profile'}
                 </button>
               </motion.form>
             )}
           </AnimatePresence>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };
