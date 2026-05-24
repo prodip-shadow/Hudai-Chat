@@ -117,6 +117,8 @@ const verifyOtp = async (req, res) => {
     const token = generateToken(user._id);
     res.cookie('auth_token', token, {
       httpOnly: true,
+      secure: true,
+      sameSite: 'none',
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
     });
     return response(res, 200, 'OTP verified successfully', { token, user });
@@ -201,7 +203,12 @@ const checkAuthenticated = async (req, res) => {
 
 const logout = (req, res) => {
   try {
-    res.cookie('auth_token', '', { expires: new Date(0) });
+    res.cookie('auth_token', '', {
+      expires: new Date(0),
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
     return response(res, 200, 'Logged out successfully');
   } catch (error) {
     console.error(error);
