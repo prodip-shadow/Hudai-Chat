@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
+const dns = require('dns');
 
 dotenv.config();
 
@@ -10,6 +11,12 @@ const transporter = nodemailer.createTransport({
     process.env.SMTP_SECURE === 'true' ||
     Number(process.env.SMTP_PORT || 587) === 465,
   family: 4,
+  lookup(hostname, options, callback) {
+    return dns.lookup(hostname, { ...options, family: 4 }, callback);
+  },
+  connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT || 10000),
+  greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 10000),
+  socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 10000),
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -35,6 +42,10 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
 }
 
 const sendOtpToEmail = async (email, otp) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    throw new Error('Email service is not configured');
+  }
+
   const html = `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
       <h2 style="color: #075e54;">🔐 WhatsApp Web Verification</h2>
