@@ -6,6 +6,8 @@ import useLayoutStore from '../store/layoutStore';
 import { FaWhatsapp,FaUserCircle, FaCog } from 'react-icons/fa';
 import { MdRadioButtonChecked } from 'react-icons/md';
 import { motion } from 'framer-motion';
+import Logo from '../images/logo.png';
+
 
 const Sidebar = () => {
   const location = useLocation();
@@ -46,8 +48,13 @@ const Sidebar = () => {
         to={'/'}
         className={`${isMobile ? '' : 'mb-8'} ${activeTab === 'chats' && 'bg-gray-300 shadow-sm  p-2 rounded-full'} focus:outline-none`}
       >
-        <FaWhatsapp
+        {/* <FaWhatsapp
           className={`h-6 w-6 ${activeTab === 'chats' ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
+        /> */}
+        <img
+          src={Logo}
+          className={`h-6 w-6 ${activeTab === 'chats' ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
+          alt="Logo"
         />
       </Link>
 
@@ -77,10 +84,6 @@ const Sidebar = () => {
           />
         )}
       </Link>
-
-
-
-          
 
       <Link
         to={'/setting'}
