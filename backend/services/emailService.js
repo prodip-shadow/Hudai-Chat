@@ -11,14 +11,18 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 transporter.verify((error, success) => {
-  if (error) {
-    console.log('Gmail Services connnection failed');
-  } else {
-    console.log('Email service is ready to send messages');
-  }
+ if (error) {
+   console.log('Gmail Services connnection failed');
+   console.log(error);
+ } else {
+   console.log('Email service is ready to send messages');
+ }
 });
 
 const sendOtpToEmail = async (email, otp) => {
