@@ -6,7 +6,9 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: Number(process.env.SMTP_PORT || 587),
-  secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT || 587) === 465,
+  secure:
+    process.env.SMTP_SECURE === 'true' ||
+    Number(process.env.SMTP_PORT || 587) === 465,
   family: 4,
   auth: {
     user: process.env.EMAIL_USER,
@@ -27,7 +29,9 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     }
   });
 } else {
-  console.log('Email service skipped verification because EMAIL_USER or EMAIL_PASS is missing');
+  console.log(
+    'Email service skipped verification because EMAIL_USER or EMAIL_PASS is missing',
+  );
 }
 
 const sendOtpToEmail = async (email, otp) => {
