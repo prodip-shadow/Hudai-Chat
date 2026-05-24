@@ -199,7 +199,7 @@ const initializeSocket = (server) => {
     );
 
     // handle disconnection and mark user as offline
-    const handleDisconnect = async (socket) => {
+    const handleDisconnect = async () => {
       if (!userId) return;
 
       try {
