@@ -37,7 +37,16 @@ const sendOTP = async (req, res) => {
       user.emailOtpExpires = expiry;
       await user.save();
 
-      await sendOtpToEmail(email, otp);
+      try {
+        await sendOtpToEmail(email, otp);
+      } catch (mailError) {
+        console.error('Failed to send email OTP:', mailError);
+        return response(
+          res,
+          503,
+          'Email service temporarily unavailable. Please try again later.',
+        );
+      }
       return response(res, 200, 'OTP sent to email', { email }); // In production, do not send OTP in response
     }
     if (!phoneNumber || !phoneSuffix) {
