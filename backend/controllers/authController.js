@@ -92,7 +92,7 @@ const verifyOtp = async (req, res) => {
         return response(res, 400, 'Invalid  or expire  otp');
       }
 
-      user.inVerified = true;
+      user.isVerified = true;
       user.emailOtp = null;
       user.emailOtpExpires = null;
       await user.save();
@@ -110,7 +110,7 @@ const verifyOtp = async (req, res) => {
       if (result.status !== 'approved') {
         return response(res, 400, 'Invalid Otp');
       }
-      user.inVerified = true;
+      user.isVerified = true;
       await user.save();
     }
 
@@ -231,7 +231,6 @@ const getAllUsers = async (req, res) => {
         return { ...user, conversation: conversation || null };
       }),
     );
-    console.log(usersWithConversation);
     return response(
       res,
       200,

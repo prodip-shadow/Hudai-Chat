@@ -7,13 +7,14 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         lowercase: true,
+        unique: true,
+        sparse: true,
         validate: {
             validator: function (value) {
                 return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
             },
             message: 'Invalid email address format',
         },
-
     },
     emailOtp: { type: String },
     emailOtpExpires: { type: Date },
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
     about: { type: String },
     lastSeen: { type: Date },
     isOnline: { type: Boolean, default: false },
-    inVerified: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
     agreed: { type: Boolean, default: false },
 }, { timestamps: true });
 
