@@ -1,33 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Layout } from './Layout';
-import {motion} from 'framer-motion';
+import { motion } from 'framer-motion';
 import ChatList from '../pages/chatSection/ChatList';
-import useLayoutStore from '../store/layoutStore';
-import { getAllUsers } from '../services/user.service';
+import { useChatStore } from '../store/chatStore';
 
 const HomePage = () => {
- 
-
-
-    const [allUsers, setAllUsers] = useState([]);
-    const getAllUser = async () => { 
-        try {
-            const result = await getAllUsers();
-            if(result.status === 'success') {
-                setAllUsers(result.data);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-
+    const { contacts, fetchContacts } = useChatStore();
 
     useEffect(() => {
-        getAllUser();
+        fetchContacts();
     }, []);
-
-
 
     return (
         <Layout>
@@ -37,9 +19,8 @@ const HomePage = () => {
                 transition={{ duration: 0.5 }}
                 className='h-full'
             >
-                <ChatList contacts={allUsers} />
+                <ChatList contacts={contacts} />
             </motion.div>
-
         </Layout>
     );
 };

@@ -98,7 +98,7 @@ const ChatList = ({ contacts }) => {
                 {contact?.conversation &&
                   contact?.conversation?.unreadCount > 0 && (
                     <p
-                      className={`text-sm font-semibold w-6 h-6 flex items-center justify-center bg-yellow-500 ${theme === 'dark' ? 'text-gray-800' : 'text-gray-500'} rounded-full truncate`}
+                      className={`text-sm font-semibold w-6 h-6 flex items-center justify-center bg-green-500 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-200'} rounded-full truncate`}
                     >
                       {contact?.conversation?.unreadCount}
                     </p>

@@ -193,8 +193,11 @@ exports.markAsRead = async (req, res) => {
       }
     }
 
-    return response(res, 200, 'Message marked as read successfully', message);
-  } catch (error) {}
+    return response(res, 200, 'Messages marked as read successfully', messages);
+  } catch (error) {
+    console.error(error);
+    return response(res, 500, 'Server error');
+  }
 };
 
 exports.deleteMessage = async (req, res) => {
@@ -219,7 +222,7 @@ exports.deleteMessage = async (req, res) => {
         message.receiver.toString(),
       );
       if (receiverSocketId) {
-        req.io.to(receiverSocketId).emit('message_deleted', messageId);
+        req.io.to(receiverSocketId).emit('message_deleted', { deletedMessageId: messageId });
       }
     }
 

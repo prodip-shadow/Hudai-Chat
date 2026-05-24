@@ -5,6 +5,7 @@ import useUserStore from './useUserStore';
 
 export const useChatStore = create((set, get) => ({
   conversations: [],
+  contacts: [],
   currentConversation: null,
   messages: [],
   loading: false,
@@ -155,7 +156,22 @@ export const useChatStore = create((set, get) => ({
   
   
     setCurrentUser: (user) => set({ currentUser: user }),
-    
+
+    fetchContacts: async () => {
+        set({ loading: true, error: null });
+        try {
+            const { data } = await axiosInstance.get('/auth/users');
+            set({ contacts: data.data || data, loading: false });
+            get().initsocketListners();
+            return data;
+        } catch (error) {
+            set({
+                error: error.response?.data?.message || error.message,
+                loading: false,
+            });
+            return null;
+        }
+    },
 
     fetchConversations: async () => { 
         set({ loading: true, error: null });
@@ -318,29 +334,29 @@ export const useChatStore = create((set, get) => ({
         }
 
 
-        // update conversation preview and unread count
+        // update contacts list (ChatList) with new lastMessage and unreadCount
         set((state) => {
-            const updatedConversations = state.conversations?.data?.map((conv) => {
-                if (conv._id === message.conversation) { 
-                    return {
-                        ...conv,
+            const isInCurrentConv = message.conversation === state.currentConversation;
+            const updatedContacts = state.contacts.map((contact) => {
+                const senderId = message.sender?._id;
+                const receiverId = message.receiver?._id;
+                const isRelated =
+                    contact._id === senderId || contact._id === receiverId;
+                if (!isRelated) return contact;
+                return {
+                    ...contact,
+                    conversation: {
+                        ...contact.conversation,
                         lastMessage: message,
-                        unreadCount: message?.receiver?._id === currentUser._id
-                            ? (conv.unreadCount || 0) + 1
-                            : conv.unreadCount || 0
-                    }
-                }
-                return conv;
-            })
-            
-
-
-            return {
-                conversations: {
-                    ...state.conversations,
-                    data: updatedConversations
-                },
-            }
+                        unreadCount: isInCurrentConv
+                            ? 0
+                            : message?.receiver?._id === currentUser._id
+                            ? (contact.conversation?.unreadCount || 0) + 1
+                            : contact.conversation?.unreadCount || 0,
+                    },
+                };
+            });
+            return { contacts: updatedContacts };
         });
 
 
@@ -370,14 +386,13 @@ export const useChatStore = create((set, get) => ({
                 messages: state.messages.map((msg) =>
                     unreadIds.includes(msg._id) ? { ...msg, messageStatus: 'read' } : msg
                 ),
-                conversations: {
-                    ...state.conversations,
-                    data: state.conversations?.data?.map((conv) =>
-                        conv._id === state.currentConversation
-                            ? { ...conv, unreadCount: 0 }
-                            : conv
-                    ),
-                },
+                contacts: state.contacts.map((contact) => {
+                    const relatedToCurrentConv =
+                        contact.conversation?._id === state.currentConversation;
+                    return relatedToCurrentConv
+                        ? { ...contact, conversation: { ...contact.conversation, unreadCount: 0 } }
+                        : contact;
+                }),
             }));
 
             const socket = getSocket();
@@ -486,9 +501,10 @@ export const useChatStore = create((set, get) => ({
 
 
 
-    cleanUP: () => { 
+    cleanUP: () => {
         set({
             conversations: [],
+            contacts: [],
             currentConversation: null,
             messages: [],
             onlineUsers: new Map(),
