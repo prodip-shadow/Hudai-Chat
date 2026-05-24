@@ -21,7 +21,7 @@ const ChatList = ({ contacts }) => {
 
   return (
     <div
-      className={`w-full border-r h-screen ${theme === 'dark' ? 'bg-[rgb(17,27,33)] border-gray-600' : 'bg-white border-gray-200'}`}
+      className={`w-full border-r h-full flex flex-col ${theme === 'dark' ? 'bg-[rgb(17,27,33)] border-gray-600' : 'bg-white border-gray-200'}`}
     >
       <div
         className={`p-4 flex justify-between ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}
@@ -49,7 +49,7 @@ const ChatList = ({ contacts }) => {
         </div>
       </div>
 
-      <div className="overflow-y-auto h-[calc(100vh-120px)]">
+      <div className="overflow-y-auto flex-1 min-h-0">
         {filteredContacts?.map((contact) => (
           <motion.div
             key={contact._id}

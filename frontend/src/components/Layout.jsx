@@ -35,12 +35,10 @@ export const Layout = ({
 
   return (
     <div
-      className={`min-h-screen ${theme === 'dark' ? 'bg-[#111b21] text-white' : 'bg-white text-gray-900'} flex relative`}
+      className={`h-screen overflow-hidden ${theme === 'dark' ? 'bg-[#111b21] text-white' : 'bg-white text-gray-900'} flex`}
     >
       {!isMobile && <Sidebar />}
-      <div
-        className={`flex-1 flex overflow-hidden ${isMobile ? 'flex-col' : ''}`}
-      >
+      <div className="flex-1 flex overflow-hidden">
         <AnimatePresence initial={false}>
           {(!selectedContact || !isMobile) && (
             <motion.div
@@ -49,7 +47,7 @@ export const Layout = ({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween' }}
-              className={`w-full  md:w-2/5 h-full ${isMobile ? 'pb-16' : ''}`}
+              className={`w-full md:w-2/5 h-full flex flex-col ${isMobile ? 'pb-14' : ''}`}
             >
               {children}
             </motion.div>
@@ -58,9 +56,9 @@ export const Layout = ({
           {(selectedContact || !isMobile) && (
             <motion.div
               key="chatWindow"
-              initial={{ x: isMobile ? '-100%' : 0 }}
+              initial={{ x: isMobile ? '100%' : 0 }}
               animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
+              exit={{ x: '100%' }}
               transition={{ type: 'tween' }}
               className="w-full h-full"
             >

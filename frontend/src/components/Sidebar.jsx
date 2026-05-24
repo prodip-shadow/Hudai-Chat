@@ -98,7 +98,7 @@ const Sidebar = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className={`${isMobile ? 'bottom-0 left-0 right-0 h-16' : 'w-16 h-screen border-r-2'}  ${theme === 'dark' ? 'bg-gray-800 border-gray-600' : 'bg-[rgb(239,242,245)] border-gray-300'} bg-opacity-90 flex items-center py-4 shadow-lg ${isMobile ? 'flex-row justify-around' : 'flex-col justify-between'} `}
+      className={`${isMobile ? 'fixed bottom-0 left-0 right-0 h-14 z-50' : 'w-16 h-screen border-r-2'} ${theme === 'dark' ? 'bg-gray-800 border-gray-600' : 'bg-[rgb(239,242,245)] border-gray-300'} flex items-center py-2 shadow-lg ${isMobile ? 'flex-row justify-around px-4' : 'flex-col justify-between py-4'}`}
     >
       {SidebarContent}
     </motion.div>

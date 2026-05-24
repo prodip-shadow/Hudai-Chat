@@ -34,6 +34,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
   const messageEndRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const isSendingRef = useRef(false);
 
   const { theme } = useThemeStore();
   const { user } = useUserStore();
@@ -117,36 +118,32 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
   };
 
   const handleSendMessage = async () => {
-    if (!selectedContact) return;
+    if (!selectedContact || isSendingRef.current) return;
+    const trimmed = message.trim();
+    if (!trimmed && !selectedFile) return;
+
+    isSendingRef.current = true;
+    const currentFile = selectedFile;
+
+    // Clear input immediately for snappy UX
+    setMessage('');
+    setSelectedFile(null);
     setFilePreview(null);
+    setShowEmojiPicker(false);
 
     try {
       const formData = new FormData();
       formData.append('senderId', user?._id);
       formData.append('receiverId', selectedContact?._id);
-
-      const status = online ? 'delivered' : 'send';
-
-      formData.append('messageStatus', status);
-      if (message.trim()) {
-        formData.append('content', message.trim());
-      }
-
-      // if there is a file include that
-      if (selectedFile) {
-        formData.append('media', selectedFile, selectedFile.name);
-      }
-      if (!message.trim() && !selectedFile) return;
+      formData.append('messageStatus', online ? 'delivered' : 'send');
+      if (trimmed) formData.append('content', trimmed);
+      if (currentFile) formData.append('media', currentFile, currentFile.name);
 
       await sendMessage({ formData });
-
-      // clear status
-      setMessage('');
-      setFilePreview(null);
-      setSelectedFile(null);
-      setShowEmojiPicker(false);
     } catch (error) {
       console.error('Fail to sending message:', error);
+    } finally {
+      isSendingRef.current = false;
     }
   };
 
@@ -201,7 +198,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
   if (!selectedContact) {
     return (
       <div
-        className={`flex-1 flex flex-col items-center justify-center mx-auto h-screen text-center ${theme === 'dark' ? 'bg-[#303430]' : 'bg-[rgb(239,242,245)]'}`}
+        className={`flex-1 flex flex-col items-center justify-center mx-auto h-full text-center ${theme === 'dark' ? 'bg-[#303430]' : 'bg-[rgb(239,242,245)]'}`}
       >
         <div className="max-w-md">
           <img src={whatsappImage} alt="chat-app" className="w-full h-auto" />
@@ -233,10 +230,10 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
 
   return (
     <div
-      className={`flex-1 flex flex-col h-screen w-full ${theme === 'dark' ? 'bg-[#303430]' : 'bg-[rgb(239,242,245)]'}`}
+      className={`flex flex-col h-full w-full ${theme === 'dark' ? 'bg-[#303430]' : 'bg-[rgb(239,242,245)]'}`}
     >
       <div
-        className={`p-4 ${theme === 'dark' ? 'bg-[#303430] text-white' : 'bg-[rgb(239,242,245)] text-gray-600'} flex items-center`}
+        className={`p-3 shrink-0 ${theme === 'dark' ? 'bg-[#303430] text-white' : 'bg-[rgb(239,242,245)] text-gray-600'} flex items-center z-10`}
       >
         <button
           className="mr-2 focus:outline-none"
@@ -283,7 +280,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
       </div>
 
       <div
-        className={` flex-1 p-4 overflow-y-auto ${theme === 'dark' ? 'bg-[#191a1a]' : 'bg-[rgb(241,236,229)]'}`}
+        className={`flex-1 min-h-0 p-4 overflow-y-auto ${theme === 'dark' ? 'bg-[#191a1a]' : 'bg-[rgb(241,236,229)]'}`}
       >
         {Object.entries(groupedMessages).map(([date, msgs]) => (
           <React.Fragment key={date}>
@@ -329,7 +326,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
       )}
 
       <div
-        className={`p-4 ${theme === 'dark' ? 'bg-[#303430]' : 'bg-white'} flex items-center space-x-2 relative`}
+        className={`p-4 shrink-0 ${theme === 'dark' ? 'bg-[#303430]' : 'bg-white'} flex items-center space-x-2 relative`}
       >
         <button
           className="focus:outline-none"

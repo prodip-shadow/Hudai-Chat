@@ -41,7 +41,7 @@ const Setting = () => {
       toggleThemeDialog={toggleThemeDialog}
     >
       <div
-        className={`flex min-h-screen ${theme === 'dark' ? 'bg-[rgb(17,27,33)] text-white' : 'bg-white text-black'}`}
+        className={`flex h-full ${theme === 'dark' ? 'bg-[rgb(17,27,33)] text-white' : 'bg-white text-black'}`}
       >
         <div
           className={`w-full border-r  ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}
@@ -74,7 +74,7 @@ const Setting = () => {
             </div>
 
             {/* Menu items */}
-            <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div>
               <div className="space-y-1">
                 {[
                   { icon: FaUser, label: 'Account', href: '/user-profile' },

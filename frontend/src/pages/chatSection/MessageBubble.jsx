@@ -96,7 +96,7 @@ const MessageBubble = ({
           )}
         </div>
 
-        <div className="absolute top-1 right-1  opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        <div className="absolute top-1 right-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20">
           <button
             onClick={() => setShowOptions((prev) => !prev)}
             className={`p-1 rounded-full bg-transparent border-0 focus:outline-none focus:ring-0 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}
@@ -106,7 +106,7 @@ const MessageBubble = ({
         </div>
 
         <div
-          className={`absolute ${isUserMessage ? '-left-10' : '-right-10'} top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2`}
+          className={`absolute ${isUserMessage ? '-left-10' : '-right-10'} top-1/2 transform -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col gap-2`}
         >
           <button
             onClick={() => setShowReactions(!showReactions)}
