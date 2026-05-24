@@ -1,9 +1,7 @@
-const { Resend } = require('resend');
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const https = require('https');
 
 const sendOtpToEmail = async (email, otp) => {
-  if (!process.env.RESEND_API_KEY) {
+  if (!process.env.BREVO_API_KEY || !process.env.EMAIL_SENDER) {
     throw new Error('Email service is not configured');
   }
 
@@ -31,16 +29,41 @@ const sendOtpToEmail = async (email, otp) => {
     </div>
   `;
 
-  const { error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || 'Hudai Chat <onboarding@resend.dev>',
-    to: email,
+  const payload = JSON.stringify({
+    sender: { email: process.env.EMAIL_SENDER },
+    to: [{ email }],
     subject: 'Your Hudai Chat OTP Verification Code',
-    html,
+    htmlContent: html,
   });
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.brevo.com',
+      path: '/v3/smtp/email',
+      method: 'POST',
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => (body += chunk));
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve();
+        } else {
+          reject(new Error(`Brevo error ${res.statusCode}: ${body}`));
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
 };
 
 module.exports = { sendOtpToEmail };
