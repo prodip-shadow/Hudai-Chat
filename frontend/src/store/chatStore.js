@@ -24,13 +24,15 @@ export const useChatStore = create((set, get) => ({
     socket.off('user_typing');
     socket.off('user_status');
     socket.off('message_send');
-    socket.off('message_status');
+    socket.off('message_status_update');
     socket.off('message_error');
     socket.off('message_deleted');
     socket.off('reaction_update');
 
     // listen for incoming messages
-    socket.on('receive_message', (message) => {});
+    socket.on('receive_message', (message) => {
+      get().receiveMessage(message);
+    });
 
     // confirm message delivery
     socket.on('message_send', (message) => {
@@ -39,11 +41,11 @@ export const useChatStore = create((set, get) => ({
           msg._id === message._id ? { ...msg } : msg)
       }))
     });
-      
+
       // update message status
-      socket.on('message_status', ({ messageId, messageStatus }) => {
+      socket.on('message_status_update', ({ messageId, messageStatus }) => {
           set((state) => ({
-              messages: state.messages.map((msg) => 
+              messages: state.messages.map((msg) =>
                   msg._id === messageId ? { ...msg, messageStatus } : msg)
           }))
        })
@@ -367,12 +369,20 @@ export const useChatStore = create((set, get) => ({
             set((state) => ({
                 messages: state.messages.map((msg) =>
                     unreadIds.includes(msg._id) ? { ...msg, messageStatus: 'read' } : msg
-                )
+                ),
+                conversations: {
+                    ...state.conversations,
+                    data: state.conversations?.data?.map((conv) =>
+                        conv._id === state.currentConversation
+                            ? { ...conv, unreadCount: 0 }
+                            : conv
+                    ),
+                },
             }));
 
             const socket = getSocket();
             if (socket) {
-                socket.emit('messages_read', {
+                socket.emit('message_read', {
                     messageIds: unreadIds,
                     senderId: messages[0]?.sender?._id,
                 });
