@@ -1,10 +1,11 @@
 import React from 'react';
+import { Layout } from '../../components/Layout';
 
 const Status = () => {
     return (
-        <div>
-            
-        </div>
+        <Layout>
+            hi from status
+        </Layout>
     );
 };
 

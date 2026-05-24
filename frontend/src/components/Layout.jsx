@@ -46,7 +46,7 @@ export const Layout = ({
               initial={{ x: isMobile ? '-100%' : 0 }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className={`w-full md:w-2/5 h-full flex flex-col ${isMobile ? 'pb-14' : ''}`}
             >
               {children}
@@ -59,7 +59,7 @@ export const Layout = ({
               initial={{ x: isMobile ? '100%' : 0 }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="w-full h-full"
             >
               <ChatWindow

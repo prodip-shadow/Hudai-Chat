@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import useLayoutStore from '../../store/layoutStore';
 import useThemeStore from '../../store/themeStore';
+import useUserStore from '../../store/useUserStore';
 import { FaSearch } from 'react-icons/fa';
 import { MdEdit } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +11,7 @@ const ChatList = ({ contacts }) => {
   const setSelectedContact = useLayoutStore((state) => state.setSelectedContact);
   const selectedContact = useLayoutStore((state) => state.selectedContact);
   const { theme } = useThemeStore();
+  const { user: currentUser } = useUserStore();
   const [searchTerms, setSearchTerms] = useState('');
 
   const filteredContacts = contacts?.filter((contact) =>
@@ -91,7 +93,7 @@ const ChatList = ({ contacts }) => {
                       {contact?.username}
                     </h3>
                     {lastMsg && (
-                      <span className={`text-xs ml-2 shrink-0 ${unread > 0 ? 'text-green-500 font-medium' : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <span className={`text-xs ml-2 shrink-0 ${unread > 0 && lastMsg?.sender?._id !== currentUser?._id ? 'text-green-500 font-medium' : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                         {formatTimestamp(lastMsg?.createdAt)}
                       </span>
                     )}
@@ -100,19 +102,19 @@ const ChatList = ({ contacts }) => {
                   {/* Last message + unread badge */}
                   <div className="flex items-center justify-between gap-2">
                     <p className={`text-sm truncate flex-1 ${
-                      unread > 0
+                      unread > 0 && lastMsg?.sender?._id !== currentUser?._id
                         ? theme === 'dark' ? 'text-white font-medium' : 'text-gray-800 font-medium'
                         : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                     }`}>
                       {lastMsg?.content || ''}
                     </p>
 
-                    {unread > 0 && (
+                    {unread > 0 && lastMsg?.sender?._id !== currentUser?._id && (
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         exit={{ scale: 0 }}
-                        className="shrink-0 min-w-[20px] h-5 flex items-center justify-center bg-green-500 text-white text-xs font-bold rounded-full px-1"
+                        className="shrink-0 min-w-5 h-5 flex items-center justify-center bg-green-500 text-white text-xs font-bold rounded-full px-1"
                       >
                         {unread > 99 ? '99+' : unread}
                       </motion.span>
