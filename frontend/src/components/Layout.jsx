@@ -75,7 +75,7 @@ export const Layout = ({
       {isMobile && <Sidebar />}
 
       {isThemeDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div
             className={`${theme === 'dark' ? 'bg-[#202c33] text-white' : 'bg-white  text-black'} p-6 rounded-lg shadow-lg max-w-sm w-full `}
           >
@@ -118,7 +118,7 @@ export const Layout = ({
 
           {/* Status Preview */}
           {isStatusPreviewOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                   {statusPreviewContent}
               </div>
           )}

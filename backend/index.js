@@ -1,7 +1,9 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const connectDB = require('./config/dbConfig');
 const bodyParser = require('body-parser');
 const authRoute = require('./routes/authRoute');
@@ -10,8 +12,6 @@ const http = require('http');
 const statusRoute = require('./routes/statusRoute');
 const initializeSocket = require('./services/socketService');
 const path = require('path');
-
-dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const app = express();
