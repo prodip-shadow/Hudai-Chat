@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="https://img.icons8.com/fluency/96/chat--v1.png" alt="Hudai Chat Logo" />
-  <h1><font size="7">Hudai Chat</font></h1>
+  <img src="https://img.icons8.com/fluency/96/chat--v1.png" alt="Mernoc Chat Logo" />
+  <h1><font size="7">Mernoc Chat</font></h1>
   <p><b>Next-Gen Scalable Real-Time Messaging Platform</b></p>
 </div>
 
@@ -8,11 +8,11 @@
 
 <h2>📖 Introduction</h2>
 <p>
-<b>Hudai Chat</b> is a high-performance, full-stack messaging platform engineered for seamless communication. Built with a focus on <b>scalability and user experience</b>, the application provides a robust infrastructure for modern conversations, ensuring speed, security, and a clutter-free interface.
+<b>Mernoc Chat</b> is a high-performance, full-stack messaging platform engineered for seamless communication. Built with a focus on <b>scalability and user experience</b>, the application provides a robust infrastructure for modern conversations, ensuring speed, security, and a clutter-free interface.
 </p>
 
 <p align="center">
-  <img src="https://i.ibb.co/vzr9p7m/chat-preview.png" alt="Hudai Chat Screen" width="100%">
+  <img src="https://i.ibb.co/vzr9p7m/chat-preview.png" alt="Mernoc Chat Screen" width="100%">
 </p>
 
 ---
