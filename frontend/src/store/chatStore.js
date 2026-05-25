@@ -1,10 +1,13 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { getSocket } from '../services/chat.service';
 import axiosInstance from '../services/url.service';
 import useUserStore from './useUserStore';
 import useLayoutStore from './layoutStore';
 
-export const useChatStore = create((set, get) => ({
+export const useChatStore = create(
+  persist(
+    (set, get) => ({
   conversations: [],
   contacts: [],
   currentConversation: null,
@@ -563,6 +566,13 @@ export const useChatStore = create((set, get) => ({
         })
     },
 
-  
-  
-}));
+
+
+}),
+    {
+      name: 'hudai-chat-contacts',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ contacts: state.contacts }),
+    },
+  ),
+);

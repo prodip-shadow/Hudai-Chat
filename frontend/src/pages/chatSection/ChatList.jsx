@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import useLayoutStore from '../../store/layoutStore';
 import useThemeStore from '../../store/themeStore';
 import useUserStore from '../../store/useUserStore';
+import { useChatStore } from '../../store/chatStore';
 import { FaSearch } from 'react-icons/fa';
 import { MdEdit } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +14,7 @@ const ChatList = ({ contacts }) => {
   const selectedContact = useLayoutStore((state) => state.selectedContact);
   const { theme } = useThemeStore();
   const { user: currentUser } = useUserStore();
+  const typingUsers = useChatStore((state) => state.typingUsers);
   const [searchTerms, setSearchTerms] = useState('');
 
   const filteredContacts = contacts?.filter((contact) =>
@@ -62,6 +64,8 @@ const ChatList = ({ contacts }) => {
             const isActive = selectedContact?._id === contact._id;
             const unread = contact?.conversation?.unreadCount || 0;
             const lastMsg = contact?.conversation?.lastMessage;
+            const convId = contact?.conversation?._id;
+            const isContactTyping = convId && typingUsers instanceof Map && typingUsers.has(convId) && typingUsers.get(convId).size > 0;
 
             return (
               <motion.div
@@ -102,13 +106,22 @@ const ChatList = ({ contacts }) => {
 
                   {/* Last message + unread badge */}
                   <div className="flex items-center justify-between gap-2">
-                    <p className={`text-sm truncate flex-1 ${
-                      unread > 0 && lastMsg?.sender?._id !== currentUser?._id
-                        ? theme === 'dark' ? 'text-white font-medium' : 'text-gray-800 font-medium'
-                        : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
-                      {lastMsg?.content || ''}
-                    </p>
+                    {isContactTyping ? (
+                      <div className="flex items-center gap-1 flex-1">
+                        <span className="text-sm text-green-500 italic">typing</span>
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '0.8s' }} />
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '160ms', animationDuration: '0.8s' }} />
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '320ms', animationDuration: '0.8s' }} />
+                      </div>
+                    ) : (
+                      <p className={`text-sm truncate flex-1 ${
+                        unread > 0 && lastMsg?.sender?._id !== currentUser?._id
+                          ? theme === 'dark' ? 'text-white font-medium' : 'text-gray-800 font-medium'
+                          : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        {lastMsg?.content || ''}
+                      </p>
+                    )}
 
                     {unread > 0 && lastMsg?.sender?._id !== currentUser?._id && (
                       <motion.span

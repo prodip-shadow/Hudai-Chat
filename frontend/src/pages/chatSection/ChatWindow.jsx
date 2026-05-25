@@ -60,23 +60,27 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
   const isTyping = isUserTyping(selectedContact?._id);
 
   useEffect(() => {
-    isInitialLoadRef.current = true;
-    if (selectedContact?._id) {
-      // Clear existing messages first so we don't show old conversation messages while loading!
-      useChatStore.setState({ messages: [], currentConversation: null });
+    if (!selectedContact?._id) return;
 
-      const directConvId = selectedContact.conversation?._id;
-      if (directConvId) {
-        fetchMessages(directConvId);
-      } else if (conversations?.data?.length > 0) {
-        const conversation = conversations?.data?.find((conv) =>
-          conv.participants.some(
-            (participant) => participant._id === selectedContact?._id,
-          ),
-        );
-        if (conversation?._id) {
-          fetchMessages(conversation._id);
-        }
+    const directConvId = selectedContact.conversation?._id;
+    const { currentConversation } = useChatStore.getState();
+
+    // Already viewing this conversation — don't wipe messages
+    if (directConvId && directConvId === currentConversation) return;
+
+    isInitialLoadRef.current = true;
+    useChatStore.setState({ messages: [], currentConversation: null });
+
+    if (directConvId) {
+      fetchMessages(directConvId);
+    } else if (conversations?.data?.length > 0) {
+      const conversation = conversations?.data?.find((conv) =>
+        conv.participants.some(
+          (participant) => participant._id === selectedContact?._id,
+        ),
+      );
+      if (conversation?._id) {
+        fetchMessages(conversation._id);
       }
     }
   }, [selectedContact, conversations, fetchMessages]);
@@ -101,6 +105,12 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
       scrollToBottom(true);
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (isTyping) {
+      scrollToBottom(true);
+    }
+  }, [isTyping]);
 
   useEffect(() => {
     if ((message, selectedContact)) {

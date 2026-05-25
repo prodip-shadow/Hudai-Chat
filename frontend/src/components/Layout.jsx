@@ -1,43 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import useLayoutStore from '../store/layoutStore';
-import { useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import useThemeStore from '../store/themeStore';
 import Sidebar from './Sidebar';
-import { AnimatePresence } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import ChatWindow from '../pages/chatSection/ChatWindow';
 
-export const Layout = ({
-  children,
-  isThemeDialogOpen,
-  toggleThemeDialog,
-  isStatusPreviewOpen,
-  statusPreviewContent,
-}) => {
+export const Layout = ({ children }) => {
   const selectedContact = useLayoutStore((state) => state.selectedContact);
-  const setSelectedContact = useLayoutStore(
-    (state) => state.setSelectedContact,
-  );
-
-  const location = useLocation();
+  const setSelectedContact = useLayoutStore((state) => state.setSelectedContact);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const { theme, setTheme } = useThemeStore();
+  const { theme } = useThemeStore();
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const leftPanel = children ?? <Outlet />;
 
   return (
     <div
       className={`h-dvh overflow-hidden ${theme === 'dark' ? 'bg-[#111b21] text-white' : 'bg-white text-gray-900'} flex`}
     >
       {!isMobile && <Sidebar />}
+
       <div className="flex-1 flex overflow-hidden relative">
         <AnimatePresence initial={false}>
           {(!selectedContact || !isMobile) && (
@@ -49,7 +37,7 @@ export const Layout = ({
               transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className={`w-full md:w-2/5 h-full flex flex-col ${isMobile ? 'absolute inset-y-0 left-0 w-full pb-14' : ''}`}
             >
-              {children}
+              {leftPanel}
             </motion.div>
           )}
 
@@ -73,58 +61,6 @@ export const Layout = ({
       </div>
 
       {isMobile && <Sidebar />}
-
-      {isThemeDialogOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div
-            className={`${theme === 'dark' ? 'bg-[#202c33] text-white' : 'bg-white  text-black'} p-6 rounded-lg shadow-lg max-w-sm w-full `}
-          >
-            <h2 className="text-2xl font-semibold mb-4">Choose a theme</h2>
-
-            <div className="space-y-4">
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  value="light"
-                  checked={theme === 'light'}
-                  onChange={() => setTheme('light')}
-                  className="from-radio text-blue-500"
-                />
-                <span>Light</span>
-              </label>
-
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  value="dark"
-                  checked={theme === 'dark'}
-                  onChange={() => setTheme('dark')}
-                  className="from-radio text-blue-500"
-                />
-                <span>Dark</span>
-              </label>
-            </div>
-
-            <button
-              onClick={toggleThemeDialog}
-              className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-200"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-          )}
-          
-
-          {/* Status Preview */}
-          {isStatusPreviewOpen && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                  {statusPreviewContent}
-              </div>
-          )}
-
-
-
     </div>
   );
 };

@@ -1,6 +1,4 @@
-import React, { useEffect } from 'react';
-import { Layout } from './Layout';
-import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import ChatList from '../pages/chatSection/ChatList';
 import { useChatStore } from '../store/chatStore';
 
@@ -11,18 +9,7 @@ const HomePage = () => {
         fetchContacts();
     }, []);
 
-    return (
-        <Layout>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className='h-full'
-            >
-                <ChatList contacts={contacts} />
-            </motion.div>
-        </Layout>
-    );
+    return <ChatList contacts={contacts} />
 };
 
 export default HomePage;

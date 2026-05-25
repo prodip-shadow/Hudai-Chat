@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 import { updateuserProfile } from '../services/user.service';
 
 import { toast } from 'react-toastify';
-import { Layout } from './Layout';
 import { motion } from 'framer-motion';
 import { FaCamera, FaCheck, FaPencilAlt, FaSmile } from 'react-icons/fa';
 import { MdCancel } from 'react-icons/md';
@@ -83,7 +82,6 @@ const UserDetails = () => {
   };
 
   return (
-    <Layout>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -292,7 +290,6 @@ const UserDetails = () => {
           </div>
         </div>
       </motion.div>
-    </Layout>
   );
 };
 

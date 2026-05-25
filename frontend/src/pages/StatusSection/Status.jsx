@@ -1,11 +1,8 @@
-import React from 'react';
-import { Layout } from '../../components/Layout';
-
 const Status = () => {
     return (
-        <Layout>
-            hi from status
-        </Layout>
+        <div className="flex-1 flex items-center justify-center h-full text-gray-400">
+            Status coming soon
+        </div>
     );
 };
 

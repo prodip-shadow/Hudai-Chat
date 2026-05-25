@@ -1,9 +1,7 @@
-import React from 'react';
 import useThemeStore from '../../store/themeStore';
 import { logoutUser } from '../../services/user.service';
 import useUserStore from '../../store/useUserStore';
 import { toast } from 'react-toastify';
-import { Layout } from '../../components/Layout';
 import { FaComments, FaMoon, FaQuestionCircle, FaSignOutAlt, FaSun, FaUser } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { MdChevronRight } from 'react-icons/md';
@@ -47,7 +45,6 @@ const Setting = () => {
   const divider = <div className={`mx-4 h-px ${dark ? 'bg-white/5' : 'bg-gray-100'}`} />;
 
   return (
-    <Layout>
       <div className={`flex h-full flex-col ${dark ? 'bg-[rgb(17,27,33)] text-white' : 'bg-[#f0f2f5] text-black'}`}>
 
         {/* Header */}
@@ -104,7 +101,6 @@ const Setting = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

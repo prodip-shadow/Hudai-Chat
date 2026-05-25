@@ -20,12 +20,12 @@ export default function Loader({ progress = 0 }) {
         {/* <FaWhatsapp className="w-16 h-16 text-green-500" /> */}
         <img src={Logo} className="w-16 h-16 text-green-500" alt="Logo" />
       </motion.div>
-      <div className="w-64 bg-white bg-opacity-30 rounded-full h-2 mb-4">
+      <div className="w-64 bg-white/20 rounded-full h-2.5 mb-4">
         <motion.div
-          className="bg-white h-full rounded-full"
+          className="bg-green-400 h-full rounded-full shadow-[0_0_8px_rgba(74,222,128,0.7)]"
           initial={{ width: '0%' }}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
         />
       </div>
       <p className="text-white text-lg font-semibold">Loading... {progress}%</p>
