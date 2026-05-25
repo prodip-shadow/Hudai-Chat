@@ -101,7 +101,7 @@
 cd backend && npm install
 
 # For Frontend
-cd ../frontend && npm install</pre>
+cd ../frontend && bun install</pre>
   </li>
   <li>Configure your <code>.env</code> file with the following variables:
     <ul>
@@ -111,7 +111,7 @@ cd ../frontend && npm install</pre>
     </ul>
   </li>
   <li>Start the development environment:
-    <pre>npm start</pre>
+    <pre>bun start</pre>
   </li>
 </ol>
 
