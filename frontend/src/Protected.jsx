@@ -6,6 +6,8 @@ import Loader from './utils/Loader';
 
 export const ProtectedRoute = () => {
   const location = useLocation();
+  const [progress, setProgress] = useState(0);
+  const [authDone, setAuthDone] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
   const { isAuthenticated, setUser, clearUser } = useUserStore();
@@ -23,15 +25,36 @@ export const ProtectedRoute = () => {
         console.log(error);
         clearUser();
       } finally {
-        setIsChecking(false);
+        setAuthDone(true);
       }
     };
 
     verifyAuth();
   }, [setUser, clearUser]);
 
+  useEffect(() => {
+    let interval;
+    if (progress < 100) {
+      interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          // Increment progress. If auth verification is done, speed up, otherwise count up steadily
+          const step = authDone ? 8 : 3;
+          const increment = Math.floor(Math.random() * step) + 2;
+          return Math.min(prev + increment, 100);
+        });
+      }, 60);
+    } else if (authDone && progress === 100) {
+      setIsChecking(false);
+    }
+    return () => clearInterval(interval);
+  }, [progress, authDone]);
+
   if (isChecking) {
-    return <Loader />;
+    return <Loader progress={progress} />;
   }
 
   if (!isAuthenticated) {

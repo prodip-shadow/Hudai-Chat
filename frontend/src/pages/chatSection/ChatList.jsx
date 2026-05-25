@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import useLayoutStore from '../../store/layoutStore';
 import useThemeStore from '../../store/themeStore';

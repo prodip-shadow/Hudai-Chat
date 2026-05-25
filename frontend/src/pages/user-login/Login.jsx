@@ -42,11 +42,6 @@ const avatars = [
   'https://api.dicebear.com/6.x/avataaars/svg?seed=Zoe',
 ];
 
-const inputClass = (dark, hasError) =>
-  `w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all border ${
-    hasError ? 'border-red-400' : dark ? 'border-white/10 focus:border-green-500' : 'border-gray-200 focus:border-green-500'
-  } ${dark ? 'bg-white/5 text-white placeholder-gray-500' : 'bg-gray-50 text-gray-900 placeholder-gray-400'}`;
-
 export const Login = () => {
   const { step, setStep, setUserPhoneData, userPhoneData, resetLoginState } = useLoginStore();
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -212,10 +207,10 @@ export const Login = () => {
           key={s}
           className={`rounded-full transition-all duration-300 ${
             s === step
-              ? 'w-7 h-2 bg-white'
+              ? 'w-7 h-2 bg-green-500'
               : s < step
-              ? 'w-2 h-2 bg-white/60'
-              : 'w-2 h-2 bg-white/25'
+              ? 'w-2 h-2 bg-green-300'
+              : 'w-2 h-2 bg-gray-200'
           }`}
         />
       ))}
@@ -228,12 +223,12 @@ export const Login = () => {
     exit: { opacity: 0, x: -24 },
   };
 
-  const glassInput = `flex items-center gap-3 bg-white/95 rounded-2xl px-4 py-3.5 transition-all ring-2 ring-transparent focus-within:ring-white/80 shadow-sm`;
-  const inputInner = `flex-1 bg-transparent outline-none text-sm text-black `;
-  const primaryBtn = `w-full py-3.5 rounded-2xl text-sm font-bold tracking-wide transition-all flex items-center justify-center bg-white hover:bg-gray-50 shadow-lg disabled:opacity-50`;
+  const cleanInput = `flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 transition-all focus-within:border-green-500 focus-within:ring-1 focus-within:ring-green-500 shadow-sm`;
+  const inputInner = `flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400`;
+  const primaryBtn = `w-full py-3 rounded-xl text-sm font-bold tracking-wide transition-all flex items-center justify-center bg-gradient-to-r from-green-400 to-blue-500 text-white hover:opacity-95 active:scale-[0.98] shadow-md disabled:opacity-50`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-300 via-green-800 to-blue-00 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-500 flex flex-col">
 
       {/* ── Brand area ── */}
       <motion.div
@@ -242,11 +237,11 @@ export const Login = () => {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="flex flex-col items-center pt-16 pb-6 px-6 text-center"
       >
-        <div className="w-20 h-20 bg-white/15 border-2 border-white/30 rounded-3xl flex items-center justify-center mb-5 shadow-2xl backdrop-blur-sm">
+        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-5 shadow-lg border border-gray-100">
           <img src={Logo} alt="Logo" className="w-12 h-12" />
         </div>
         <h1 className="text-4xl font-extrabold text-white tracking-tight">Merno</h1>
-        <p className="text-white/55 text-sm mt-2 font-medium">
+        <p className="text-white/80 text-sm mt-2 font-medium">
           {step === 1 ? 'Sign in to your account' : step === 2 ? 'Verify your identity' : 'Complete your profile'}
         </p>
       </motion.div>
@@ -257,12 +252,12 @@ export const Login = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.1, ease: 'easeOut' }}
-          className="w-full max-w-sm bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-7 shadow-2xl"
+          className="w-full max-w-sm bg-white rounded-2xl p-7 shadow-xl border border-gray-100"
         >
           <StepDots />
 
           {error && (
-            <div className="text-sm text-center mb-5 rounded-2xl py-3 px-4 bg-red-500/20 border border-red-400/30 text-red-100">
+            <div className="text-sm text-center mb-5 rounded-xl py-3 px-4 bg-red-50 border border-red-200 text-red-700">
               {error}
             </div>
           )}
@@ -280,7 +275,7 @@ export const Login = () => {
                 className="space-y-4"
                 onSubmit={handleLoginSubmit(onLoginSubmit)}
               >
-                <p className="text-white/65 text-sm text-center">
+                <p className="text-gray-500 text-sm text-center mb-2">
                   Enter your email to receive an OTP
                 </p>
 
@@ -355,7 +350,7 @@ export const Login = () => {
 
                 {/* Email row */}
                 <div>
-                  <div className={`${glassInput} ${loginErrors.email ? 'ring-red-400' : ''}`}>
+                  <div className={`${cleanInput} ${loginErrors.email ? 'border-red-400 focus-within:ring-red-400 focus-within:border-red-400' : ''}`}>
                     <MdEmail className="text-gray-400 shrink-0" size={18} />
                     <input
                       type="email"
@@ -366,13 +361,13 @@ export const Login = () => {
                       className={inputInner}
                     />
                   </div>
-                  {loginErrors.email && <p className="text-red-300 text-xs mt-1.5 ml-1">{loginErrors.email.message}</p>}
+                  {loginErrors.email && <p className="text-red-500 text-xs mt-1.5 ml-1">{loginErrors.email.message}</p>}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`${primaryBtn} text-[#006b3c]`}
+                  className={`${primaryBtn}`}
                 >
                   {loading ? <Spinner /> : 'Send OTP'}
                 </button>
@@ -391,9 +386,9 @@ export const Login = () => {
                 className="space-y-5"
                 onSubmit={handleOtpSubmit(onOtpSubmit)}
               >
-                <p className="text-white/65 text-sm text-center leading-relaxed">
+                <p className="text-gray-500 text-sm text-center leading-relaxed mb-2">
                   Enter the 6-digit code sent to{' '}
-                  <span className="text-white font-semibold">
+                  <span className="text-gray-800 font-semibold">
                     {userPhoneData?.email || `${userPhoneData?.phoneSuffix} ${userPhoneData?.phoneNumber}`}
                   </span>
                 </p>
@@ -411,22 +406,22 @@ export const Login = () => {
                       onChange={e => handleOtpChange(i, e.target.value)}
                       onKeyDown={e => handleOtpKeyDown(i, e)}
                       onPaste={i === 0 ? handleOtpPaste : undefined}
-                      className={`w-11 h-13 text-center text-xl font-bold rounded-2xl outline-none transition-all shadow-sm ${
+                      className={`w-11 h-12 text-center text-xl font-bold rounded-xl outline-none transition-all border ${
                         otpErrors.otp
-                          ? 'bg-red-100 ring-2 ring-red-400 text-red-700'
+                          ? 'bg-red-50 border-red-400 text-red-700 focus:ring-1 focus:ring-red-400'
                           : digit
-                          ? 'bg-white ring-2 ring-white/80 text-[#006b3c]'
-                          : 'bg-white/90 ring-2 ring-transparent focus:ring-white/80 text-gray-800'
+                          ? 'bg-white border-green-500 text-green-600 focus:ring-1 focus:ring-green-500'
+                          : 'bg-gray-50 border-gray-200 text-gray-800 focus:border-green-500 focus:ring-1 focus:ring-green-500'
                       }`}
                     />
                   ))}
                 </div>
-                {otpErrors.otp && <p className="text-red-300 text-xs text-center">{otpErrors.otp.message}</p>}
+                {otpErrors.otp && <p className="text-red-500 text-xs text-center">{otpErrors.otp.message}</p>}
 
                 <button
                   type="submit"
                   disabled={loading || otp.join('').length < 6}
-                  className={`${primaryBtn} text-[#006b3c]`}
+                  className={`${primaryBtn}`}
                 >
                   {loading ? <Spinner /> : 'Verify OTP'}
                 </button>
@@ -434,7 +429,7 @@ export const Login = () => {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="w-full py-3 rounded-2xl text-sm font-medium text-white/60 hover:text-white transition-colors flex items-center justify-center gap-2 border border-white/15 hover:border-white/30"
+                  className="w-full py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50"
                 >
                   <FaArrowLeft size={11} />
                   Go back
@@ -460,18 +455,18 @@ export const Login = () => {
                     <img
                       src={profilePicture ? URL.createObjectURL(profilePicture) : selectedAvatar}
                       alt="profile"
-                      className="w-22 h-22 object-cover rounded-full ring-4 ring-white/40 shadow-xl"
+                      className="w-22 h-22 object-cover rounded-full ring-4 ring-gray-100 shadow-md"
                     />
                     <label
                       htmlFor="profile-picture"
-                      className="absolute bottom-0.5 right-0.5 bg-white text-[#006b3c] hover:bg-gray-100 p-2 rounded-full cursor-pointer transition-colors shadow-lg"
+                      className="absolute bottom-0.5 right-0.5 bg-gradient-to-r from-green-400 to-blue-500 text-white hover:opacity-90 p-2 rounded-full cursor-pointer transition-colors shadow-md flex items-center justify-center"
                     >
                       <FaPlus size={9} />
                     </label>
                     <input type="file" id="profile-picture" className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
 
-                  <p className="text-white/50 text-xs mb-3">Or choose an avatar</p>
+                  <p className="text-gray-400 text-xs mb-3">Or choose an avatar</p>
                   <div className="flex gap-2 flex-wrap justify-center">
                     {avatars.map((a, i) => (
                       <img
@@ -481,8 +476,8 @@ export const Login = () => {
                         onClick={() => setSelectedAvatar(a)}
                         className={`w-11 h-11 rounded-full cursor-pointer transition-all hover:scale-110 ${
                           selectedAvatar === a && !profilePicture
-                            ? 'ring-3 ring-white scale-110 shadow-lg'
-                            : 'opacity-55 hover:opacity-90'
+                            ? 'ring-3 ring-green-500 scale-110 shadow-md'
+                            : 'opacity-60 hover:opacity-90'
                         }`}
                       />
                     ))}
@@ -491,7 +486,7 @@ export const Login = () => {
 
                 {/* Username */}
                 <div>
-                  <div className={`${glassInput} ${profileErrors.username ? 'ring-red-400' : ''}`}>
+                  <div className={`${cleanInput} ${profileErrors.username ? 'border-red-400 focus-within:ring-red-400 focus-within:border-red-400' : ''}`}>
                     <FaUser className="text-gray-400 shrink-0" size={13} />
                     <input
                       {...profileRegister('username')}
@@ -500,7 +495,7 @@ export const Login = () => {
                       className={inputInner}
                     />
                   </div>
-                  {profileErrors.username && <p className="text-red-300 text-xs mt-1.5 ml-1">{profileErrors.username.message}</p>}
+                  {profileErrors.username && <p className="text-red-500 text-xs mt-1.5 ml-1">{profileErrors.username.message}</p>}
                 </div>
 
                 {/* Terms */}
@@ -509,19 +504,19 @@ export const Login = () => {
                     type="checkbox"
                     id="agreed"
                     {...profileRegister('agreed')}
-                    className="mt-0.5 accent-white cursor-pointer"
+                    className="mt-0.5 accent-green-500 cursor-pointer"
                   />
-                  <label htmlFor="agreed" className="text-xs cursor-pointer leading-relaxed text-white/60">
+                  <label htmlFor="agreed" className="text-xs cursor-pointer leading-relaxed text-gray-500">
                     I agree to the{' '}
-                    <a href="#" className="text-white underline underline-offset-2 hover:text-white/80">Terms and Conditions</a>
+                    <a href="#" className="text-green-600 font-medium underline underline-offset-2 hover:text-green-700">Terms and Conditions</a>
                   </label>
                 </div>
-                {profileErrors.agreed && <p className="text-red-300 text-xs">{profileErrors.agreed.message}</p>}
+                {profileErrors.agreed && <p className="text-red-500 text-xs">{profileErrors.agreed.message}</p>}
 
                 <button
                   type="submit"
                   disabled={!watch('agreed') || loading}
-                  className={`${primaryBtn} text-[#006b3c]`}
+                  className={`${primaryBtn}`}
                 >
                   {loading ? <Spinner /> : 'Create Profile'}
                 </button>

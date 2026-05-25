@@ -24,7 +24,7 @@ const isValidate = (date) => {
   return date instanceof Date && !isNaN(date);
 };
 
-const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
+const ChatWindow = ({ selectedContact, setSelectedContact }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showFileMenu, setShowFileMenu] = useState(false);
@@ -41,9 +41,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
   const { user } = useUserStore();
   const {
     messages,
-    loading,
     sendMessage,
-    receiveMessage,
     fetchMessages,
     fetchConversations,
     conversations,
@@ -52,7 +50,6 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
     stopTyping,
     getUserLastSeen,
     isUserOnline,
-    cleanUP,
     deleteMessage,
     addReaction,
   } = useChatStore();
@@ -64,21 +61,29 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
 
   useEffect(() => {
     isInitialLoadRef.current = true;
-    if (selectedContact?._id && conversations?.data?.length > 0) {
-      const conversation = conversations?.data?.find((conv) =>
-        conv.participants.some(
-          (participant) => participant._id === selectedContact?._id,
-        ),
-      );
-      if (conversation?._id) {
-        fetchMessages(conversation._id);
+    if (selectedContact?._id) {
+      // Clear existing messages first so we don't show old conversation messages while loading!
+      useChatStore.setState({ messages: [], currentConversation: null });
+
+      const directConvId = selectedContact.conversation?._id;
+      if (directConvId) {
+        fetchMessages(directConvId);
+      } else if (conversations?.data?.length > 0) {
+        const conversation = conversations?.data?.find((conv) =>
+          conv.participants.some(
+            (participant) => participant._id === selectedContact?._id,
+          ),
+        );
+        if (conversation?._id) {
+          fetchMessages(conversation._id);
+        }
       }
     }
   }, [selectedContact, conversations, fetchMessages]);
 
   useEffect(() => {
     fetchConversations();
-  }, []);
+  }, [fetchConversations]);
 
   const isInitialLoadRef = useRef(true);
 
@@ -298,10 +303,19 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
           <React.Fragment key={date}>
             {renderDateSeparator(new Date(date))}
             {msgs
-              .filter(
-                (msg) =>
-                  msg.conversation === selectedContact?.conversation?._id,
-              )
+              .filter((msg) => {
+                const msgSenderId = msg.sender?._id || msg.sender;
+                const msgReceiverId = msg.receiver?._id || msg.receiver;
+                const isRelated =
+                  (msgSenderId === user?._id && msgReceiverId === selectedContact?._id) ||
+                  (msgSenderId === selectedContact?._id && msgReceiverId === user?._id);
+
+                if (selectedContact?.conversation?._id) {
+                  const msgConvId = msg.conversation?._id || msg.conversation;
+                  return msgConvId === selectedContact.conversation._id || isRelated;
+                }
+                return isRelated;
+              })
               .map((msg) => (
                 <MessageBubble
                   key={msg._id || msg.tempId}

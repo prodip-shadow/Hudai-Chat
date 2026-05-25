@@ -38,7 +38,7 @@ export const Layout = ({
       className={`h-dvh overflow-hidden ${theme === 'dark' ? 'bg-[#111b21] text-white' : 'bg-white text-gray-900'} flex`}
     >
       {!isMobile && <Sidebar />}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <AnimatePresence initial={false}>
           {(!selectedContact || !isMobile) && (
             <motion.div
@@ -47,7 +47,7 @@ export const Layout = ({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className={`w-full md:w-2/5 h-full flex flex-col ${isMobile ? 'pb-14' : ''}`}
+              className={`w-full md:w-2/5 h-full flex flex-col ${isMobile ? 'absolute inset-y-0 left-0 w-full pb-14' : ''}`}
             >
               {children}
             </motion.div>
@@ -60,7 +60,7 @@ export const Layout = ({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="w-full h-full"
+              className={`w-full h-full ${isMobile ? 'absolute inset-y-0 left-0 w-full' : ''}`}
             >
               <ChatWindow
                 selectedContact={selectedContact}

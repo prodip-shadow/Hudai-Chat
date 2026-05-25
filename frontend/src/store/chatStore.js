@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { getSocket } from '../services/chat.service';
 import axiosInstance from '../services/url.service';
 import useUserStore from './useUserStore';
+import useLayoutStore from './layoutStore';
 
 export const useChatStore = create((set, get) => ({
   conversations: [],
@@ -234,7 +235,6 @@ export const useChatStore = create((set, get) => ({
         const messageStatus = formData.get('messageStatus'); 
 
 
-        const socket = getSocket();
         const { conversations } = get();
         let conversationId = null;
 
@@ -288,6 +288,7 @@ export const useChatStore = create((set, get) => ({
 
             // replace optimistic message with actual message from server
             set((state) => ({
+                currentConversation: messageData.conversation,
                 messages: state.messages.map((msg) =>
                     msg._id === tempId ? messageData : msg
                 ),
@@ -298,6 +299,7 @@ export const useChatStore = create((set, get) => ({
                               ...contact,
                               conversation: {
                                   ...contact.conversation,
+                                  _id: messageData.conversation,
                                   lastMessage: messageData,
                                   unreadCount: 0,
                               },
@@ -305,6 +307,20 @@ export const useChatStore = create((set, get) => ({
                         : contact
                 ),
             }));
+
+            // Sync layoutStore's selectedContact if it is a brand-new conversation
+            const currentSelected = useLayoutStore.getState().selectedContact;
+            if (currentSelected && currentSelected._id === receiverId && !currentSelected.conversation?._id) {
+                useLayoutStore.getState().setSelectedContact({
+                    ...currentSelected,
+                    conversation: {
+                        ...currentSelected.conversation,
+                        _id: messageData.conversation,
+                        lastMessage: messageData,
+                        unreadCount: 0,
+                    }
+                });
+            }
 
             return messageData;
         } catch (error) {
@@ -337,27 +353,43 @@ export const useChatStore = create((set, get) => ({
         const messageExist = messages.some((msg) => msg._id === message._id);
         if (messageExist) return;
 
-        if(message.conversation === currentConversation) {
+        // Check if the message is from the active contact
+        const activeContact = useLayoutStore.getState().selectedContact;
+        const senderId = message.sender?._id || message.sender;
+        const receiverId = message.receiver?._id || message.receiver;
+        const isFromActiveContact = activeContact && (activeContact._id === senderId || activeContact._id === receiverId);
+
+        // If conversation IDs match OR if this is a first message for the active contact (where currentConversation is null)
+        if (message.conversation === currentConversation || (currentConversation === null && isFromActiveContact)) {
             set((state) => ({
+                currentConversation: message.conversation,
                 messages: [...state.messages, message]
             }));
+
+            // Sync layoutStore's selectedContact if it doesn't have a conversation ID yet
+            if (activeContact && isFromActiveContact && !activeContact.conversation?._id) {
+                useLayoutStore.getState().setSelectedContact({
+                    ...activeContact,
+                    conversation: {
+                        ...activeContact.conversation,
+                        _id: message.conversation,
+                        lastMessage: message,
+                        unreadCount: 0,
+                    }
+                });
+            }
 
             // automatically mark as read
             if (message?.receiver?._id === currentUser._id) { 
                 get().markMessagesAsRead();
             }
-
-
-
         }
 
 
-        // update contacts list (ChatList) with new lastMessage and unreadCount
+        // update contacts list (ChatList) with new lastMessage, unreadCount, and conversation ID
         set((state) => {
             const isInCurrentConv = message.conversation === state.currentConversation;
             const updatedContacts = state.contacts.map((contact) => {
-                const senderId = message.sender?._id;
-                const receiverId = message.receiver?._id;
                 const isRelated =
                     contact._id === senderId || contact._id === receiverId;
                 if (!isRelated) return contact;
@@ -365,6 +397,7 @@ export const useChatStore = create((set, get) => ({
                     ...contact,
                     conversation: {
                         ...contact.conversation,
+                        _id: message.conversation,
                         lastMessage: message,
                         unreadCount: isInCurrentConv
                             ? 0
