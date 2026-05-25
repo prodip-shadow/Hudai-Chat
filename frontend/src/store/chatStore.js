@@ -259,8 +259,14 @@ export const useChatStore = create((set, get) => ({
             receiver: { _id: receiverId },
             conversation: conversationId,
             imageOrVideoUrl: media && typeof media !== 'string' ? URL.createObjectURL(media) : null,
-            content: content,
-            contentType: media ? media.type.startsWith('image') ? 'image' : 'video' : 'text',
+            content: content || (media ? media.name : null),
+            contentType: media
+              ? media.type.startsWith('image')
+                ? 'image'
+                : media.type.startsWith('video')
+                  ? 'video'
+                  : 'document'
+              : 'text',
             createdAt: new Date().toISOString(),
             messageStatus
         };

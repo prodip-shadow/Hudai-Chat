@@ -17,7 +17,7 @@ const normalizeUploadedUrl = (url, req) => {
 
 exports.sendMessage = async (req, res) => {
   try {
-    const { senderId, receiverId, content, messageStatus } = req.body;
+    let { senderId, receiverId, content, messageStatus } = req.body;
     const file = req.file;
 
     const participants = [senderId, receiverId].sort();
@@ -49,7 +49,10 @@ exports.sendMessage = async (req, res) => {
       } else if (file.mimetype.startsWith('video')) {
         contentType = 'video';
       } else {
-        return response(res, 400, 'Unsupported media type');
+        contentType = 'document';
+      }
+      if (!content && file.originalname) {
+        content = file.originalname;
       }
     } else if (content?.trim()) {
       contentType = 'text';

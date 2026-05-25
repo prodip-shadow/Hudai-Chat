@@ -1,13 +1,26 @@
 import React, { useRef, useState } from 'react';
 import { format } from 'date-fns';
-import { FaCheck, FaCheckDouble, FaPlus, FaRegCopy, FaSmile } from 'react-icons/fa';
+import {
+  FaCheck,
+  FaCheckDouble,
+  FaFile,
+  FaPlus,
+  FaRegCopy,
+  FaSmile,
+} from 'react-icons/fa';
 import { HiDotsVertical } from 'react-icons/hi';
 import useOutsideClick from '../../hooks/useOutsideclick';
 import EmojiPicker from 'emoji-picker-react';
 import { RxCross2 } from 'react-icons/rx';
 import { IoTrashBin } from 'react-icons/io5';
 
-const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) => {
+const MessageBubble = ({
+  message,
+  theme,
+  currentUser,
+  onReact,
+  deleteMessage,
+}) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -43,9 +56,15 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
     setShowOptions((prev) => !prev);
   };
 
-  useOutsideClick(emojiPickerRef, () => { if (showEmojiPicker) setShowEmojiPicker(false); });
-  useOutsideClick(reactionsMenuRef, () => { if (showReactions) setShowReactions(false); });
-  useOutsideClick(optionsRef, () => { if (showOptions) setShowOptions(false); });
+  useOutsideClick(emojiPickerRef, () => {
+    if (showEmojiPicker) setShowEmojiPicker(false);
+  });
+  useOutsideClick(reactionsMenuRef, () => {
+    if (showReactions) setShowReactions(false);
+  });
+  useOutsideClick(optionsRef, () => {
+    if (showOptions) setShowOptions(false);
+  });
 
   if (message === 0) return null;
 
@@ -57,11 +76,54 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
       >
         {/* Message content */}
         <div className="flex justify-center gap-2">
-          {message.contentType === 'text' && <p className="mr-2">{message.content}</p>}
+          {message.contentType === 'text' && (
+            <p className="mr-2">{message.content}</p>
+          )}
           {message.contentType === 'image' && (
             <div>
-              <img src={message.imageOrVideoUrl} alt="media" className="rounded-lg max-w-xs" />
+              <img
+                src={message.imageOrVideoUrl}
+                alt="media"
+                className="rounded-lg max-w-xs"
+              />
               <p className="mt-1">{message.content}</p>
+            </div>
+          )}
+
+          {message.contentType === 'video' && (
+            <div>
+              <video
+                src={message.imageOrVideoUrl}
+                alt="media"
+                controls
+                className="rounded-lg max-w-xs"
+              />
+              <p className="mt-1">{message.content}</p>
+            </div>
+          )}
+          {message.contentType === 'document' && (
+            <div className="flex flex-col gap-2 p-1 min-w-[200px]">
+              <a
+                href={message.imageOrVideoUrl}
+                download={message.content || 'Document'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-3 p-3 rounded-lg border decoration-transparent hover:no-underline transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800/80 text-white'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-black'
+                }`}
+              >
+                <FaFile className="h-8 w-8 text-blue-500 shrink-0" />
+                <div className="flex flex-col min-w-0 max-w-[200px] text-start">
+                  <span className="text-sm font-semibold truncate">
+                    {message.content || 'Document'}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    Click to download
+                  </span>
+                </div>
+              </a>
             </div>
           )}
         </div>
@@ -72,9 +134,15 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
           {isUserMessage && (
             <>
               {message.messageStatus === 'send' && <FaCheck size={12} />}
-              {message.messageStatus === 'delivered' && <FaCheckDouble size={12} />}
-              {message.messageStatus === 'read' && <FaCheckDouble size={12} className="text-blue-400" />}
-              {message.messageStatus === 'failed' && <span className="text-red-400 text-xs">!</span>}
+              {message.messageStatus === 'delivered' && (
+                <FaCheckDouble size={12} />
+              )}
+              {message.messageStatus === 'read' && (
+                <FaCheckDouble size={12} className="text-blue-400" />
+              )}
+              {message.messageStatus === 'failed' && (
+                <span className="text-red-400 text-xs">!</span>
+              )}
             </>
           )}
         </div>
@@ -109,13 +177,25 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
             className={`absolute -top-12 ${isUserMessage ? 'right-0' : 'left-0'} flex items-center ${theme === 'dark' ? 'bg-[#2a3942]' : 'bg-white'} rounded-full px-2 py-1.5 gap-1 shadow-xl z-50 border ${theme === 'dark' ? 'border-white/10' : 'border-gray-200'}`}
           >
             {quickReactions.map((emoji) => (
-              <button key={emoji} onClick={() => handleReact(emoji)} className="hover:scale-125 transition-transform p-0.5 text-lg">
+              <button
+                key={emoji}
+                onClick={() => handleReact(emoji)}
+                className="hover:scale-125 transition-transform p-0.5 text-lg"
+              >
                 {emoji}
               </button>
             ))}
             <div className="w-px h-4 bg-gray-500 mx-1" />
-            <button className="hover:scale-110 transition-transform rounded-full p-1" onClick={() => { setShowReactions(false); setShowEmojiPicker(true); }}>
-              <FaPlus className={`h-3 w-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
+            <button
+              className="hover:scale-110 transition-transform rounded-full p-1"
+              onClick={() => {
+                setShowReactions(false);
+                setShowEmojiPicker(true);
+              }}
+            >
+              <FaPlus
+                className={`h-3 w-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
+              />
             </button>
           </div>
         )}
@@ -124,8 +204,14 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
         {showEmojiPicker && (
           <div ref={emojiPickerRef} className="absolute mb-6 left-0 z-50">
             <div className="relative">
-              <EmojiPicker onEmojiClick={(obj) => handleReact(obj.emoji)} theme={theme} />
-              <button onClick={() => setShowEmojiPicker(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+              <EmojiPicker
+                onEmojiClick={(obj) => handleReact(obj.emoji)}
+                theme={theme}
+              />
+              <button
+                onClick={() => setShowEmojiPicker(false)}
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              >
                 <RxCross2 />
               </button>
             </div>
@@ -146,7 +232,11 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
               <span key={emoji} className="leading-none">
                 {emoji}
                 {count > 1 && (
-                  <span className={`text-xs ml-0.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>{count}</span>
+                  <span
+                    className={`text-xs ml-0.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}
+                  >
+                    {count}
+                  </span>
                 )}
               </span>
             ))}
@@ -165,7 +255,8 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
           >
             <button
               onClick={() => {
-                if (message.contentType === 'text') navigator.clipboard.writeText(message.content);
+                if (message.contentType === 'text')
+                  navigator.clipboard.writeText(message.content);
                 setShowOptions(false);
               }}
               className={`flex items-center w-full px-4 py-3 gap-3 text-sm font-medium transition-colors ${
@@ -178,9 +269,14 @@ const MessageBubble = ({ message, theme, currentUser, onReact, deleteMessage }) 
 
             {isUserMessage && (
               <>
-                <div className={`h-px mx-2 ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'}`} />
+                <div
+                  className={`h-px mx-2 ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'}`}
+                />
                 <button
-                  onClick={() => { deleteMessage(message._id); setShowOptions(false); }}
+                  onClick={() => {
+                    deleteMessage(message._id);
+                    setShowOptions(false);
+                  }}
                   className={`flex items-center w-full px-4 py-3 gap-3 text-sm font-medium text-red-500 transition-colors ${
                     theme === 'dark' ? 'hover:bg-white/10' : 'hover:bg-red-50'
                   }`}

@@ -19,7 +19,7 @@ const messageSchema = new mongoose.Schema(
     },
     content: { type: String },
     imageOrVideoUrl: { type: String },
-    contentType: { type: String, enum: ['text', 'image', 'video'] },
+    contentType: { type: String, enum: ['text', 'image', 'video', 'document'] },
     reactions: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

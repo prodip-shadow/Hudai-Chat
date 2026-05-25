@@ -34,6 +34,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
   const messageEndRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const docFileInputRef = useRef(null);
   const isSendingRef = useRef(false);
 
   const { theme } = useThemeStore();
@@ -119,9 +120,12 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
     if (file) {
       setSelectedFile(file);
       setShowFileMenu(false);
-      if (file.type.startsWith('image/')) {
-        setFilePreview(URL.createObjectURL(file));
-      }
+      setFilePreview({
+        url: URL.createObjectURL(file),
+        type: file.type,
+        name: file.name,
+        size: file.size,
+      });
     }
   };
 
@@ -315,18 +319,32 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
 
       {filePreview && (
         <div className="relative p-2">
-          <img
-            src={filePreview}
-            alt="file-preview"
-            className="w-80 object-cover rounded shadow-lg mx-auto"
-          />
+          {filePreview.type?.startsWith('video/') ? (
+            <video
+              src={filePreview.url}
+              controls
+              className="w-80 object-cover rounded shadow-lg mx-auto"
+            />
+          ) : filePreview.type?.startsWith('image/') ? (
+            <img
+              src={filePreview.url}
+              alt="file-preview"
+              className="w-80 object-cover rounded shadow-lg mx-auto"
+            />
+          ) : (
+            <div className={`w-80 flex flex-col items-center justify-center p-4 rounded shadow-lg mx-auto border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-100 border-gray-200 text-black'}`}>
+              <FaFile className="h-12 w-12 text-blue-500 mb-2" />
+              <span className="text-sm font-semibold truncate max-w-full text-center">{filePreview.name}</span>
+              <span className="text-xs text-gray-500 mt-1">{(filePreview.size / 1024).toFixed(1)} KB</span>
+            </div>
+          )}
 
           <button
             onClick={() => {
               setSelectedFile(null);
               setFilePreview(null);
             }}
-            className="absolute top-2 right-1 bg-red-500 text-white hover:bg-red-600 rounded-full p-1"
+            className="absolute top-2 right-1 bg-red-500 text-white hover:bg-red-600 rounded-full p-1 z-10"
           >
             <FaTimes className="h-4 w-4" />
           </button>
@@ -378,6 +396,13 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
                 onChange={handleFileChange}
                 accept="image/*,video/*"
               />
+              <input
+                type="file"
+                ref={docFileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
+              />
               <button
                 onClick={() => fileInputRef.current.click()}
                 className={`flex items-center px-4 py-2 w-full transition-colors hover:bg-gray-100 ${theme === 'dark' ? ' hover:bg-gray-500' : 'hover:bg-gray-100'}`}
@@ -387,7 +412,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact, isMobile }) => {
               </button>
 
               <button
-                onClick={() => fileInputRef.current.click()}
+                onClick={() => docFileInputRef.current.click()}
                 className={`flex items-center px-4 py-2 w-full transition-colors hover:bg-gray-100 ${theme === 'dark' ? ' hover:bg-gray-500' : 'hover:bg-gray-100'}`}
               >
                 <FaFile className="mr-2" />
