@@ -88,7 +88,9 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
   const isInitialLoadRef = useRef(true);
 
   const scrollToBottom = (smooth = false) => {
-    messageEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    messageEndRef.current?.scrollIntoView({
+      behavior: smooth ? 'smooth' : 'auto',
+    });
   };
 
   useEffect(() => {
@@ -271,7 +273,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
           </h2>
 
           {isTyping ? (
-            <div>typing...</div>
+            <p className="text-sm text-green-500 font-medium">typing...</p>
           ) : (
             <p
               className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
@@ -307,12 +309,16 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
                 const msgSenderId = msg.sender?._id || msg.sender;
                 const msgReceiverId = msg.receiver?._id || msg.receiver;
                 const isRelated =
-                  (msgSenderId === user?._id && msgReceiverId === selectedContact?._id) ||
-                  (msgSenderId === selectedContact?._id && msgReceiverId === user?._id);
+                  (msgSenderId === user?._id &&
+                    msgReceiverId === selectedContact?._id) ||
+                  (msgSenderId === selectedContact?._id &&
+                    msgReceiverId === user?._id);
 
                 if (selectedContact?.conversation?._id) {
                   const msgConvId = msg.conversation?._id || msg.conversation;
-                  return msgConvId === selectedContact.conversation._id || isRelated;
+                  return (
+                    msgConvId === selectedContact.conversation._id || isRelated
+                  );
                 }
                 return isRelated;
               })
@@ -328,6 +334,33 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
               ))}
           </React.Fragment>
         ))}
+        {isTyping && (
+          <div className="flex items-end gap-2 mb-2">
+            <img
+              src={selectedContact?.profilePicture}
+              alt={selectedContact?.username}
+              className="w-8 h-8 rounded-full flex-shrink-0"
+            />
+            <div
+              className={`px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm ${theme === 'dark' ? 'bg-[#2a2f2a]' : 'bg-white'}`}
+            >
+              <div className="flex items-center gap-1">
+                <span
+                  className="w-2.5 h-2.5 rounded-full bg-gray-400 animate-bounce"
+                  style={{ animationDelay: '0ms', animationDuration: '1s' }}
+                />
+                <span
+                  className="w-2.5 h-2.5 rounded-full bg-gray-400 animate-bounce"
+                  style={{ animationDelay: '200ms', animationDuration: '1s' }}
+                />
+                <span
+                  className="w-2.5 h-2.5 rounded-full bg-gray-400 animate-bounce"
+                  style={{ animationDelay: '400ms', animationDuration: '1s' }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={messageEndRef} />
       </div>
 
@@ -346,10 +379,16 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
               className="w-80 object-cover rounded shadow-lg mx-auto"
             />
           ) : (
-            <div className={`w-80 flex flex-col items-center justify-center p-4 rounded shadow-lg mx-auto border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-100 border-gray-200 text-black'}`}>
+            <div
+              className={`w-80 flex flex-col items-center justify-center p-4 rounded shadow-lg mx-auto border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-100 border-gray-200 text-black'}`}
+            >
               <FaFile className="h-12 w-12 text-blue-500 mb-2" />
-              <span className="text-sm font-semibold truncate max-w-full text-center">{filePreview.name}</span>
-              <span className="text-xs text-gray-500 mt-1">{(filePreview.size / 1024).toFixed(1)} KB</span>
+              <span className="text-sm font-semibold truncate max-w-full text-center">
+                {filePreview.name}
+              </span>
+              <span className="text-xs text-gray-500 mt-1">
+                {(filePreview.size / 1024).toFixed(1)} KB
+              </span>
             </div>
           )}
 

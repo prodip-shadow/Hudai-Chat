@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-import React from 'react'
-import { motion } from 'framer-motion'
+import React from 'react';
+import { motion } from 'framer-motion';
 import Logo from '../images/logo.png';
-
 
 export default function Loader({ progress = 0 }) {
   return (
@@ -24,7 +23,7 @@ export default function Loader({ progress = 0 }) {
       <div className="w-64 bg-white bg-opacity-30 rounded-full h-2 mb-4">
         <motion.div
           className="bg-white h-full rounded-full"
-          initial={{ width: 0 }}
+          initial={{ width: '0%' }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.5 }}
         />
