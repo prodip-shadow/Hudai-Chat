@@ -94,7 +94,7 @@
 
 <ol>
   <li>Clone the repository:
-    <pre>git clone https://github.com/prodip2005/hudai-chat.git</pre>
+    <pre>https://github.com/prodip-shadow/Mernoc-Chat.git</pre>
   </li>
   <li>Install dependencies for both environments:
     <pre># For Backend
