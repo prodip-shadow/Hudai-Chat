@@ -140,3 +140,6 @@ const useVideoCallStore = create(
     }
   })),
 );
+
+
+export default useVideoCallStore;
