@@ -94,7 +94,7 @@ const useVideoCallStore = create(
       }
     },
 
-    toggleAudio: () => {
+    toggleVideo: () => {
       const { localStream, isAudioEnabled } = get();
       if (localStream) {
         const audioTrack = localStream.getAudioTracks()[0];
