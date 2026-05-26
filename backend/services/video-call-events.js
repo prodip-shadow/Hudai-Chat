@@ -45,33 +45,57 @@ const handleVideoCallEvents = (socket, io, onlineUsers) => {
       io.to(callerSocketId).emit('call_rejected', { callId });
     }
   });
-    
-    
 
+  // end call
+  socket.on('end_call', ({ callId, participantId }) => {
+    // Handle initiate call logic
+    const participantSocketId = onlineUsers.get(participantId);
+    if (participantSocketId) {
+      io.to(participantSocketId).emit('call_ended', { callId });
+    }
+  });
 
-    // end call
-     socket.on('end_call', ({ callId, participantId }) => {
-       // Handle initiate call logic
-       const participantSocketId = onlineUsers.get(participantId);
-       if (participantSocketId) {
-         io.to(participantSocketId).emit('call_ended', { callId });
-       }
-     });
+  // webRTC signaling events
+  socket.on('webrtc_offer', ({ offer, receiverId, callId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('webrtc_offer', {
+        offer,
+        senderId: socket.userId,
+        callId,
+      });
+      console.log(`Server: offer forwarded to receiver ${receiverId} `);
+    } else {
+      console.log(`Server: Receiver ${receiverId} not found offer`);
+    }
+  });
 
-    
-    // webRTC signaling events
-    socket.on('webrtc_offer', ({ offer, receiverId, callId }) => {
-      const receiverSocketId = onlineUsers.get(receiverId);
-      if (receiverSocketId) {
-          io.to(receiverSocketId).emit('webrtc_offer', {
-              offer,
-              senderId: socket.userId,
-              callId
-          });
-      } else {
-          console.log(`Server offer forwaredd to receiver ${receiverId} `);
-      }
-    });
-    
-    
+  socket.on('webrtc_answer', ({ answer, receiverId, callId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('webrtc_answer', {
+        answer,
+        senderId: socket.userId,
+        callId,
+      });
+      console.log(`Server: answer forwarded to receiver ${receiverId} `);
+    } else {
+      console.log(`Server: Receiver ${receiverId} not found answer`);
+    }
+  });
+
+  socket.on('webrtc_ice_candidate', ({ candidate, receiverId, callId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('webrtc_ice_candidate', {
+        candidate,
+        senderId: socket.userId,
+        callId,
+      });
+    } else {
+      console.log(`Server: Receiver ${receiverId} not found ice candidate`);
+    }
+  });
 };
+
+module.exports = handleVideoCallEvents;

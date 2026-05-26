@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const User = require('../models/User');
 const Message = require('../models/Message');
+const handleVideoCallEvents = require('./video-call-events');
 
 // Map to store online users
 
@@ -29,6 +30,7 @@ const initializeSocket = (server) => {
     socket.on('user_connected', async (connectingUserId) => {
       try {
         userId = connectingUserId;
+        socket.userId = userId; // Attach userId to socket for easy access in other events
         onlineUsers.set(userId, socket.id);
         socket.join(userId); // Join a room with the userId as the room name
 
@@ -197,6 +199,15 @@ const initializeSocket = (server) => {
         }
       },
     );
+
+
+
+    // handle video call events
+    handleVideoCallEvents(io, socket, onlineUsers);
+
+
+
+
 
     // handle disconnection and mark user as offline
     const handleDisconnect = async () => {
