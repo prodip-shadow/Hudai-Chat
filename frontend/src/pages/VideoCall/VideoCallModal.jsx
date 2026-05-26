@@ -47,8 +47,17 @@ export const VideoCallModal = ({ socket }) => {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' },
+      {
+        urls: [
+          'turn:openrelay.metered.ca:80',
+          'turn:openrelay.metered.ca:443',
+          'turn:openrelay.metered.ca:443?transport=tcp',
+        ],
+        username: 'openrelayproject',
+        credential: 'openrelayproject',
+      },
     ],
+    iceCandidatePoolSize: 10,
   };
 
   const displayInfo = useMemo(() => {
@@ -88,16 +97,28 @@ export const VideoCallModal = ({ socket }) => {
   // attach remote stream — video element for video calls, audio element always (for voice)
   useEffect(() => {
     if (remoteStream) {
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
-      if (remoteAudioRef.current) remoteAudioRef.current.srcObject = remoteStream;
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+        remoteVideoRef.current.play().catch(() => {});
+      }
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = remoteStream;
+        remoteAudioRef.current.play().catch(() => {});
+      }
     }
   }, [remoteStream]);
 
   const initializeMedia = async (video = true) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: video ? { width: 640, height: 480 } : false,
-        audio: true,
+        video: video
+          ? { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+          : false,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100,
+        },
       });
       setLocalStream(stream);
       return stream;
@@ -307,7 +328,7 @@ export const VideoCallModal = ({ socket }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       {/* Hidden audio element — plays remote audio for both audio and video calls */}
-      <audio ref={remoteAudioRef} autoPlay />
+      <audio ref={remoteAudioRef} autoPlay playsInline />
 
       <div
         className={`relative w-full h-full max-w-4xl rounded-lg overflow-hidden ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
