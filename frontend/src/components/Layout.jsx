@@ -5,12 +5,15 @@ import useThemeStore from '../store/themeStore';
 import Sidebar from './Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
 import ChatWindow from '../pages/chatSection/ChatWindow';
+import VideoCallManager from '../pages/VideoCall/VideoCallManager';
+import { getSocket } from '../services/chat.service';
 
 export const Layout = ({ children }) => {
   const selectedContact = useLayoutStore((state) => state.selectedContact);
   const setSelectedContact = useLayoutStore((state) => state.setSelectedContact);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { theme } = useThemeStore();
+  const socket = getSocket();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -61,6 +64,9 @@ export const Layout = ({ children }) => {
       </div>
 
       {isMobile && <Sidebar />}
+
+      {/* Always mounted so incoming calls work regardless of selected contact */}
+      <VideoCallManager socket={socket} />
     </div>
   );
 };

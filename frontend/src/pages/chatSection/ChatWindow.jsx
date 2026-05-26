@@ -19,7 +19,6 @@ import {
 } from 'react-icons/fa';
 import MessageBubble from './MessageBubble';
 import EmojiPicker from 'emoji-picker-react';
-import VideoCallManager from '../VideoCall/VideoCallManager';
 import { getSocket } from '../../services/chat.service';
 import useVideoCallStore from '../../store/videoCallStore';
 
@@ -42,7 +41,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
 
   const { theme } = useThemeStore();
   const { user } = useUserStore();
-  const {socket}=getSocket()
+  const socket=getSocket()
 
 
 
@@ -235,17 +234,29 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
 
   const handleVideoCall = () => {
     if (selectedContact && online) {
-      // initiate video call
-      const {initiateCall} = useVideoCallStore.getState();
+      const callId = `${user?._id}-${selectedContact?._id}-${Date.now()}`;
+      const { setCurrentCall, setCallType, setCallModalOpen, setCallStatus } =
+        useVideoCallStore.getState();
 
+      setCurrentCall({
+        callId,
+        participantId: selectedContact?._id,
+        participantName: selectedContact?.username,
+        participantAvatar: selectedContact?.profilePicture,
+      });
+      setCallType('video');
+      setCallModalOpen(true);
+      setCallStatus('calling');
 
-      const avatar = selectedContact?.profilePicture;
-      initiateCall(
-        selectedContact?._id,
-        selectedContact?.username,
-        avatar,
-        'video',
-      )
+      socket.emit('initiate_call', {
+        callerId: user?._id,
+        receiverId: selectedContact?._id,
+        callType: 'video',
+        callerInfo: {
+          username: user?.username,
+          profilePicture: user?.profilePicture,
+        },
+      });
     } else {
       alert('User is offline. Cannot start video call.');
     }
@@ -540,7 +551,6 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
         </div>
       </div>
 
-      <VideoCallManager socket={socket} />
     </>
   );
 };
