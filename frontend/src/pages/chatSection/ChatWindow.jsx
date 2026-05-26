@@ -252,6 +252,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
         callerId: user?._id,
         receiverId: selectedContact?._id,
         callType: 'video',
+        callId,
         callerInfo: {
           username: user?.username,
           profilePicture: user?.profilePicture,

@@ -1,17 +1,15 @@
-const handleVideoCallEvents = (socket, io, onlineUsers) => {
+const handleVideoCallEvents = (io, socket, onlineUsers) => {
   // initiate call
   socket.on(
     'initiate_call',
-    ({ callerId, receiverId, callType, callerInfo }) => {
+    ({ callerId, receiverId, callType, callerInfo, callId }) => {
       // Handle initiate call logic
       const receiverSocketId = onlineUsers.get(receiverId);
       if (receiverSocketId) {
-        const callId = `${callerId}-${receiverId}-${Date.now()}`;
-
         io.to(receiverSocketId).emit('incoming_call', {
           callerId,
           callerName: callerInfo.username,
-          callerAvatar: callerInfo.profilePicture,
+          callerAvater: callerInfo.profilePicture,
           callId,
           callType,
         });
