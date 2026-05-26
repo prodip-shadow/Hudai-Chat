@@ -11,9 +11,11 @@ export const initializeSocket = () => {
   const BACKEND_URL = import.meta.env.VITE_API_URL;
   socket = io(BACKEND_URL, {
     withCredentials: true,
-    transports: ['websocket', 'polling'],
-    reconnectionAttempts: 5,
-    reconnectionsDelay: 1000,
+    transports: ['polling', 'websocket'],
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000,
   });
 
   // connection events
