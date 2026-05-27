@@ -47,6 +47,8 @@ export const VideoCallModal = ({ socket }) => {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun.cloudflare.com:3478' },
+      // openrelay — free public TURN
       {
         urls: [
           'turn:openrelay.metered.ca:80',
@@ -56,8 +58,19 @@ export const VideoCallModal = ({ socket }) => {
         username: 'openrelayproject',
         credential: 'openrelayproject',
       },
+      // freeturn.net — backup free TURN
+      {
+        urls: [
+          'turn:freeturn.net:3478',
+          'turns:freeturn.net:5349',
+        ],
+        username: 'free',
+        credential: 'free',
+      },
     ],
     iceCandidatePoolSize: 10,
+    iceTransportPolicy: 'all',
+    bundlePolicy: 'max-bundle',
   };
 
   const displayInfo = useMemo(() => {
@@ -156,7 +169,7 @@ export const VideoCallModal = ({ socket }) => {
     };
 
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed') {
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
         setCallStatus('failed');
         setTimeout(handleEndCall, 2000);
       }
@@ -164,6 +177,10 @@ export const VideoCallModal = ({ socket }) => {
 
     pc.oniceconnectionstatechange = () => {
       console.log(`[${role}] ICE state:`, pc.iceConnectionState);
+      if (pc.iceConnectionState === 'failed') {
+        // try to recover via ICE restart before giving up
+        pc.restartIce();
+      }
     };
 
     setPeerConnection(pc);
