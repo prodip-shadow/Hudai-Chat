@@ -177,9 +177,25 @@ export const VideoCallModal = ({ socket }) => {
 
     pc.oniceconnectionstatechange = () => {
       console.log(`[${role}] ICE state:`, pc.iceConnectionState);
-      if (pc.iceConnectionState === 'failed') {
-        // try to recover via ICE restart before giving up
-        pc.restartIce();
+      if (pc.iceConnectionState === 'failed' && role === 'CALLER') {
+        // proper ICE restart: caller sends new offer with iceRestart flag,
+        // receiver answers via existing webrtc_offer handler
+        (async () => {
+          try {
+            const offer = await pc.createOffer({ iceRestart: true });
+            await pc.setLocalDescription(offer);
+            const { currentCall: cc } = useVideoCallStore.getState();
+            if (socket && cc) {
+              socket.emit('webrtc_offer', {
+                offer,
+                receiverId: cc.participantId,
+                callId: cc.callId,
+              });
+            }
+          } catch (err) {
+            console.error('ICE restart failed:', err);
+          }
+        })();
       }
     };
 
