@@ -169,7 +169,7 @@ export const VideoCallModal = ({ socket }) => {
     };
 
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+      if (pc.connectionState === 'failed') {
         setCallStatus('failed');
         setTimeout(handleEndCall, 2000);
       }
