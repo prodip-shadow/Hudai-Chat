@@ -202,7 +202,10 @@ const MessageBubble = ({
 
         {/* Full emoji picker */}
         {showEmojiPicker && (
-          <div ref={emojiPickerRef} className="absolute mb-6 left-0 z-50">
+          <div
+            ref={emojiPickerRef}
+            className={`absolute bottom-full mb-2 z-50 ${isUserMessage ? 'right-0' : 'left-0'}`}
+          >
             <div className="relative">
               <EmojiPicker
                 onEmojiClick={(obj) => handleReact(obj.emoji)}

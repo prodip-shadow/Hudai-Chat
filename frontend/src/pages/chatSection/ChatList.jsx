@@ -10,6 +10,19 @@ import { MdEdit } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import formatTimestamp from '../../utils/formatTime';
 
+const ContactSkeleton = ({ theme }) => (
+  <div className="flex items-center px-3 py-3 gap-3">
+    <div className={`w-12 h-12 rounded-full shrink-0 animate-pulse ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`} />
+    <div className="flex-1 space-y-2.5">
+      <div className="flex justify-between">
+        <div className={`h-3.5 w-28 rounded-full animate-pulse ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`} />
+        <div className={`h-3 w-10 rounded-full animate-pulse ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`} />
+      </div>
+      <div className={`h-3 w-44 rounded-full animate-pulse ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-100'}`} />
+    </div>
+  </div>
+);
+
 const ChatList = ({ contacts }) => {
   const setSelectedContact = useLayoutStore((state) => state.setSelectedContact);
   const selectedContact = useLayoutStore((state) => state.selectedContact);
@@ -17,6 +30,7 @@ const ChatList = ({ contacts }) => {
   const { theme } = useThemeStore();
   const { user: currentUser } = useUserStore();
   const typingUsers = useChatStore((state) => state.typingUsers);
+  const loading = useChatStore((state) => state.loading);
   const [searchTerms, setSearchTerms] = useState('');
   const navigate = useNavigate();
 
@@ -69,7 +83,18 @@ const ChatList = ({ contacts }) => {
 
       {/* Contact list or empty state */}
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-        {(!filteredContacts || filteredContacts.length === 0) ? (
+        {loading && (!contacts || contacts.length === 0) ? (
+          /* Skeleton: first load, no cache */
+          <div>
+            {[...Array(7)].map((_, i) => (
+              <React.Fragment key={i}>
+                <ContactSkeleton theme={theme} />
+                {i < 6 && <hr className={`mx-4 ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-100'}`} />}
+              </React.Fragment>
+            ))}
+          </div>
+        ) : !contacts || contacts.length === 0 ? (
+          /* No friends at all */
           <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
               <FaUserPlus className={`h-7 w-7 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
@@ -87,6 +112,11 @@ const ChatList = ({ contacts }) => {
               <FaUserPlus className="h-3.5 w-3.5" />
               Add Friends
             </button>
+          </div>
+        ) : filteredContacts.length === 0 ? (
+          /* Search returned nothing */
+          <div className={`flex justify-center pt-12 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            No results for &ldquo;{searchTerms}&rdquo;
           </div>
         ) : (
           <AnimatePresence initial={false}>

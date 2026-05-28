@@ -162,7 +162,8 @@ export const useChatStore = create(
     setCurrentUser: (user) => set({ currentUser: user }),
 
     fetchContacts: async () => {
-        set({ loading: true, error: null });
+        const hasCache = get().contacts.length > 0;
+        set({ loading: !hasCache, error: null });
         try {
             const { data } = await axiosInstance.get('/friends/contacts');
             set({ contacts: data.data || data, loading: false });
