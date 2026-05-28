@@ -54,9 +54,9 @@ const App = () => {
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/user-profile" element={<UserDetails />} />
-              <Route path="/status" element={<Status />} />
               <Route path="/setting" element={<Setting />} />
             </Route>
+            <Route path="/status" element={<Status />} />
           </Route>
         </Routes>
       </Router>

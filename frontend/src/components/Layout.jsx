@@ -8,7 +8,7 @@ import ChatWindow from '../pages/chatSection/ChatWindow';
 import VideoCallManager from '../pages/VideoCall/VideoCallManager';
 import { getSocket } from '../services/chat.service';
 
-export const Layout = ({ children }) => {
+export const Layout = ({ children, isStatusPreview, statusPreviewContact }) => {
   const selectedContact = useLayoutStore((state) => state.selectedContact);
   const setSelectedContact = useLayoutStore((state) => state.setSelectedContact);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -44,7 +44,7 @@ export const Layout = ({ children }) => {
             </motion.div>
           )}
 
-          {(selectedContact || !isMobile) && (
+          {(selectedContact || !isMobile || isStatusPreview) && (
             <motion.div
               key="chatWindow"
               initial={{ x: isMobile ? '100%' : 0 }}
@@ -53,11 +53,13 @@ export const Layout = ({ children }) => {
               transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className={`w-full h-full ${isMobile ? 'absolute inset-y-0 left-0 w-full' : ''}`}
             >
-              <ChatWindow
-                selectedContact={selectedContact}
-                setSelectedContact={setSelectedContact}
-                isMobile={isMobile}
-              />
+              {isStatusPreview ? statusPreviewContact : (
+                <ChatWindow
+                  selectedContact={selectedContact}
+                  setSelectedContact={setSelectedContact}
+                  isMobile={isMobile}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>

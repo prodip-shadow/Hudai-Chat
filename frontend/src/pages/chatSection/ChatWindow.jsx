@@ -41,9 +41,7 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
 
   const { theme } = useThemeStore();
   const { user } = useUserStore();
-  const socket=getSocket()
-
-
+  const socket = getSocket();
 
   const {
     messages,
@@ -230,8 +228,6 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
     addReaction({ messageId, emoji });
   };
 
-
-
   const handleVideoCall = () => {
     if (selectedContact && online) {
       const callId = `${user?._id}-${selectedContact?._id}-${Date.now()}`;
@@ -262,7 +258,6 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
       alert('User is offline. Cannot start video call.');
     }
   };
-
 
   if (!selectedContact) {
     return (
@@ -339,7 +334,11 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="focus:outline-none" onClick={handleVideoCall} title={online ? 'Start Video Call' : 'User is offline'}>
+            <button
+              className="focus:outline-none"
+              onClick={handleVideoCall}
+              title={online ? 'Start Video Call' : 'User is offline'}
+            >
               <FaVideo className="h-5 w-5 text-green-500 hover:text-green-600" />
             </button>
 
@@ -551,7 +550,6 @@ const ChatWindow = ({ selectedContact, setSelectedContact }) => {
           </button>
         </div>
       </div>
-
     </>
   );
 };
