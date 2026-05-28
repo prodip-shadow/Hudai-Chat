@@ -157,7 +157,7 @@ const useStatusStore = create((set, get) => ({
           id: statusUserId,
           name: status.user?.username,
           avatar: status?.user?.profilePicture,
-          statuses: [status],
+          statuses: [],
         };
       }
 

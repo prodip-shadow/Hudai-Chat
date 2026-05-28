@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import useThemeStore from '../../store/themeStore';
 import useUserStore from '../../store/useUserStore';
 import useStatusStore from '../../store/useStatusStore';
@@ -115,7 +116,7 @@ const Status = () => {
     setCurrentStatusIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleStatusPreview = (contact, statusIndex) => {
+  const handleStatusPreview = (contact, statusIndex = 0) => {
     setPreviewContact(contact);
     setCurrentStatusIndex(statusIndex);
     if (contact.statuses[statusIndex]) {
@@ -124,24 +125,21 @@ const Status = () => {
   };
 
   return (
-    <Layout
-      isStatusPreview={!!previewContact}
-      statusPreviewContact={
-        previewContact && (
-          <StatusPreview
-            contact={previewContact}
-            currentIndex={currentStatusIndex}
-            onClose={handlePreviewClose}
-            onNext={handlePreviewNext}
-            onPrev={handlePreviewPrev}
-            onDelete={handleDeleteStatus}
-            theme={theme}
-            currentUser={user}
-            loading={loading}
-          />
-        )
-      }
-    >
+    <Layout>
+      {previewContact && ReactDOM.createPortal(
+        <StatusPreview
+          contact={previewContact}
+          currentIndex={currentStatusIndex}
+          onClose={handlePreviewClose}
+          onNext={handlePreviewNext}
+          onPrev={handlePreviewPrev}
+          onDelete={handleDeleteStatus}
+          theme={theme}
+          currentUser={user}
+          loading={loading}
+        />,
+        document.body
+      )}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
