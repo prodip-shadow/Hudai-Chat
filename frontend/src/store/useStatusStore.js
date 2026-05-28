@@ -3,20 +3,17 @@ import { getSocket } from '../services/chat.service';
 import axiosInstance from '../services/url.service';
 
 const useStatusStore = create((set, get) => ({
-  // state
   statuses: [],
   loading: false,
   error: null,
+  viewedStatusIds: {},
 
-  // actions
   setStatuses: (statuses) => set({ statuses }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
 
-  // Initialize  the socket listener
   initializeSocket: () => {
     const socket = getSocket();
-
     if (!socket) return;
 
     socket.on('new_status', (newStatus) => {
@@ -39,6 +36,7 @@ const useStatusStore = create((set, get) => ({
       }));
     });
   },
+
   cleanUpSocket: () => {
     const socket = getSocket();
     if (socket) {
@@ -48,9 +46,7 @@ const useStatusStore = create((set, get) => ({
     }
   },
 
-  // Fetch status
-
-  fetchStatuses: async (userId) => {
+  fetchStatuses: async () => {
     set({ loading: true, error: null });
     try {
       const { data } = await axiosInstance.get('status');
@@ -61,27 +57,17 @@ const useStatusStore = create((set, get) => ({
     }
   },
 
-  // create status
   createStatus: async (statusData) => {
     set({ loading: true, error: null });
     try {
       const formData = new FormData();
-
-      if (statusData.file) {
-        formData.append('media', statusData.file);
-      }
-
-      if (statusData.content?.trim()) {
-        formData.append('content', statusData.content);
-      }
+      if (statusData.file) formData.append('media', statusData.file);
+      if (statusData.content?.trim()) formData.append('content', statusData.content);
 
       const { data } = await axiosInstance.post('/status', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      // add to  status in local  state
       if (data?.data) {
         set((state) => ({
           statuses: state.statuses.some((s) => s._id === data.data._id)
@@ -92,30 +78,22 @@ const useStatusStore = create((set, get) => ({
       } else {
         set({ loading: false });
       }
-
       return data.data;
     } catch (error) {
-      console.error('Error creating status:', error);
-
       set({ error: error.message, loading: false });
       throw error;
     }
   },
 
-  // view status
+  // No loading spinner — background operation
   viewStatus: async (statusId) => {
     try {
-      set({ loading: true, error: null });
-
       await axiosInstance.put(`status/${statusId}/view`);
       set((state) => ({
-        statuses: state.statuses.map((s) =>
-          s._id === statusId ? { ...s } : s,
-        ),
+        viewedStatusIds: { ...state.viewedStatusIds, [statusId]: true },
       }));
     } catch (error) {
       console.error('Error viewing status:', error);
-      set({ error: error.message,loading: false });
     }
   },
 
@@ -128,8 +106,6 @@ const useStatusStore = create((set, get) => ({
         loading: false,
       }));
     } catch (error) {
-      console.error('Error deleting status:', error);
-
       set({ error: error.message, loading: false });
       throw error;
     }
@@ -137,19 +113,16 @@ const useStatusStore = create((set, get) => ({
 
   getStatusViewers: async (statusId) => {
     try {
-      set({ loading: true, error: null });
       const { data } = await axiosInstance.get(`/status/${statusId}/viewers`);
       return data.data;
     } catch (error) {
       console.error('Error fetching status viewers:', error);
-      set({ error: error.message, loading: false });
       throw error;
     }
   },
 
-  // helper function for groupped status
   getGroupedStatus: () => {
-    const { statuses } = get();
+    const { statuses, viewedStatusIds } = get();
     return statuses.reduce((acc, status) => {
       const statusUserId = status.user?._id;
       if (!acc[statusUserId]) {
@@ -160,40 +133,44 @@ const useStatusStore = create((set, get) => ({
           statuses: [],
         };
       }
-
       acc[statusUserId].statuses.push({
         id: status._id,
         media: status.content,
         contentType: status.contentType,
         timestamp: status.createdAt,
         viewers: status.viewers,
+        seen: !!viewedStatusIds[status._id],
       });
-
       return acc;
     }, {});
   },
 
   getUserStatuses: (userId) => {
-    const groupedStatuses = get().getGroupedStatus();
-    return userId ? groupedStatuses[userId] : null;
+    const grouped = get().getGroupedStatus();
+    return userId ? grouped[userId] : null;
   },
 
   getOtherStatuses: (userId) => {
-    const groupedStatuses = get().getGroupedStatus();
-    return Object.values(groupedStatuses).filter(
-      (contact) => contact.id !== userId,
-    );
+    const grouped = get().getGroupedStatus();
+    return Object.values(grouped)
+      .filter((contact) => contact.id !== userId)
+      .map((contact) => ({
+        ...contact,
+        allSeen: contact.statuses.every((s) => s.seen),
+      }))
+      .sort((a, b) => {
+        // Unseen first
+        if (a.allSeen !== b.allSeen) return a.allSeen ? 1 : -1;
+        // Then most recent
+        const aTime = new Date(a.statuses[a.statuses.length - 1]?.timestamp || 0);
+        const bTime = new Date(b.statuses[b.statuses.length - 1]?.timestamp || 0);
+        return bTime - aTime;
+      });
   },
 
-  // clear error
   clearError: () => set({ error: null }),
 
-  reset: () =>
-    set({
-      statuses: [],
-      loading: false,
-      error: null,
-    }),
+  reset: () => set({ statuses: [], loading: false, error: null, viewedStatusIds: {} }),
 }));
 
 export default useStatusStore;

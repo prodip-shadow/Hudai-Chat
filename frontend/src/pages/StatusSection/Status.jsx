@@ -7,14 +7,13 @@ import { Layout } from '../../components/Layout';
 import StatusPreview from './StatusPreview';
 import { motion } from 'framer-motion';
 import { RxCross2 } from 'react-icons/rx';
-import { FaCamera, FaEllipsisH, FaEye, FaPlus } from 'react-icons/fa';
+import { FaCamera, FaPlus } from 'react-icons/fa';
 import formatTimestamp from '../../utils/formatTime';
 import StatusList from './StatusList';
 
 const Status = () => {
-  const [previewContact, setPreviewContact] = useState(false);
+  const [previewContact, setPreviewContact] = useState(null);
   const [currentStatusIndex, setCurrentStatusIndex] = useState(0);
-  const [showOption, setShowOption] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newStatus, setNewStatus] = useState('');
@@ -23,7 +22,6 @@ const Status = () => {
   const { theme } = useThemeStore();
   const { user } = useUserStore();
 
-  // Status store
   const {
     loading,
     error,
@@ -31,11 +29,9 @@ const Status = () => {
     createStatus,
     viewStatus,
     deleteStatus,
-    getStatusViewers,
     getUserStatuses,
     getOtherStatuses,
     clearError,
-    reset,
     initializeSocket,
     cleanUpSocket,
   } = useStatusStore();
@@ -46,9 +42,7 @@ const Status = () => {
   useEffect(() => {
     fetchStatuses();
     initializeSocket();
-    return () => {
-      cleanUpSocket();
-    };
+    return () => cleanUpSocket();
   }, [cleanUpSocket, fetchStatuses, initializeSocket]);
 
   useEffect(() => {
@@ -68,34 +62,28 @@ const Status = () => {
   const handleCreateStatus = async () => {
     if (!newStatus.trim() && !selectedFile) return;
     try {
-      await createStatus({
-        content: newStatus,
-        file: selectedFile,
-      });
+      await createStatus({ content: newStatus, file: selectedFile });
       setNewStatus('');
       setSelectedFile(null);
       setFilePreview(null);
       setShowCreateModal(false);
-    } catch (error) {
-      console.error('Error creating status:', error);
-    }
-  };
-
-  const handleViewStatus = async (statusId) => {
-    try {
-      await viewStatus(statusId);
-    } catch (error) {
-      console.error('Error viewing status:', error);
+    } catch (err) {
+      console.error('Error creating status:', err);
     }
   };
 
   const handleDeleteStatus = async (statusId) => {
     try {
       await deleteStatus(statusId);
-      setShowOption(false);
-      handlePreviewClose();
-    } catch (error) {
-      console.error('Error deleting status:', error);
+      // If only one status left, close preview
+      if (previewContact?.statuses.length <= 1) {
+        handlePreviewClose();
+      } else {
+        // Move to previous or stay
+        setCurrentStatusIndex((prev) => Math.max(prev - 1, 0));
+      }
+    } catch (err) {
+      console.error('Error deleting status:', err);
     }
   };
 
@@ -106,7 +94,11 @@ const Status = () => {
 
   const handlePreviewNext = () => {
     if (currentStatusIndex < previewContact.statuses.length - 1) {
-      setCurrentStatusIndex((prev) => prev + 1);
+      const nextIndex = currentStatusIndex + 1;
+      setCurrentStatusIndex(nextIndex);
+      if (previewContact.statuses[nextIndex]) {
+        viewStatus(previewContact.statuses[nextIndex].id);
+      }
     } else {
       handlePreviewClose();
     }
@@ -120,98 +112,93 @@ const Status = () => {
     setPreviewContact(contact);
     setCurrentStatusIndex(statusIndex);
     if (contact.statuses[statusIndex]) {
-      handleViewStatus(contact.statuses[statusIndex].id);
+      viewStatus(contact.statuses[statusIndex].id);
     }
   };
 
+  const bg = theme === 'dark' ? 'bg-[rgb(12,19,24)]' : 'bg-gray-100';
+  const cardBg = theme === 'dark' ? 'bg-[rgb(17,27,33)]' : 'bg-white';
+
   return (
     <Layout>
-      {previewContact && ReactDOM.createPortal(
-        <StatusPreview
-          contact={previewContact}
-          currentIndex={currentStatusIndex}
-          onClose={handlePreviewClose}
-          onNext={handlePreviewNext}
-          onPrev={handlePreviewPrev}
-          onDelete={handleDeleteStatus}
-          theme={theme}
-          currentUser={user}
-          loading={loading}
-        />,
-        document.body
-      )}
+      {previewContact &&
+        ReactDOM.createPortal(
+          <StatusPreview
+            contact={previewContact}
+            currentIndex={currentStatusIndex}
+            onClose={handlePreviewClose}
+            onNext={handlePreviewNext}
+            onPrev={handlePreviewPrev}
+            onDelete={handleDeleteStatus}
+            currentUser={user}
+            loading={loading}
+          />,
+          document.body,
+        )}
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className={`flex-1 h-screen border-r ${theme === 'dark' ? 'bg-[rgb(12,19,24)] border-gray-600 text-white' : 'bg-gray-100 text-black'}`}
+        transition={{ duration: 0.3 }}
+        className={`flex-1 h-screen border-r ${bg} ${theme === 'dark' ? 'border-gray-600 text-white' : 'text-black'}`}
       >
-        <div
-          className={`flex justify-between items-center shadow-md ${theme === 'dark' ? 'bg-[rgb(17,27,33)]' : 'bg-white'} p-4`}
-        >
-          <h2 className="text-2xl">Status</h2>
+        {/* Header */}
+        <div className={`flex justify-between items-center shadow-md ${cardBg} p-4`}>
+          <h2 className="text-xl font-semibold">Status</h2>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-4 mt-2">
-            <span className="block sm:inline">{error}</span>
-            <button
-              onClick={() => clearError()}
-              className="float-right text-res-500 hover:text-red-700"
-            >
-              <RxCross2 className="h-5 w-5" />
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-4 mt-2 flex justify-between items-center">
+            <span>{error}</span>
+            <button onClick={clearError}>
+              <RxCross2 className="h-4 w-4" />
             </button>
           </div>
         )}
 
         <div className="overflow-y-auto h-[calc(100vh-64px)]">
-          <div
-            className={`flex  p-3 space-x-4 shadow-md ${theme === 'dark' ? 'bg-[rgb(17,27,33)]' : 'bg-white'}`}
-          >
+
+          {/* My Status */}
+          <div className={`flex items-center gap-3 p-3 ${cardBg}`}>
+            {/* Avatar with ring */}
             <div
-              className="relative cursor-pointer"
+              className="relative cursor-pointer shrink-0"
               onClick={() =>
-                userStatuses
-                  ? handleStatusPreview(userStatuses)
-                  : setShowCreateModal(true)
+                userStatuses ? handleStatusPreview(userStatuses) : setShowCreateModal(true)
               }
             >
-              <img
-                src={user?.profilePicture}
-                alt={user?.username}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-
               {userStatuses ? (
-                <>
-                  <svg
-                    className="absolute top-0 left-0 w-12 h-12"
-                    viewBox="0 0 100 100"
-                  >
+                // Segmented ring when has statuses
+                <div className="relative w-14 h-14">
+                  <img
+                    src={user?.profilePicture}
+                    alt={user?.username}
+                    className="w-14 h-14 rounded-full object-cover"
+                  />
+                  <svg className="absolute inset-0 w-14 h-14" viewBox="0 0 100 100">
                     {userStatuses.statuses.map((_, index) => {
-                      const circumference = 2 * Math.PI * 48;
-                      const segmentLength =
-                        circumference / userStatuses.statuses.length;
-                      const offset = index * segmentLength;
+                      const total = userStatuses.statuses.length;
+                      const circumference = 2 * Math.PI * 46;
+                      const segmentLength = circumference / total - 3;
+                      const gap = 3;
+                      const offset = index * (segmentLength + gap);
                       return (
                         <circle
                           key={index}
                           cx="50"
                           cy="50"
-                          r="48"
+                          r="46"
                           fill="none"
                           stroke="#25D366"
                           strokeWidth="4"
-                          strokeDasharray={`${segmentLength - 5} 5`}
-                          strokeDashoffset={-offset}
-                          transform={`rotate(-90 50 50) translate(0 -100)`}
+                          strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
+                          strokeDashoffset={-(offset - circumference * 0.25)}
                         />
                       );
                     })}
                   </svg>
-
                   <button
-                    className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full p-1 "
+                    className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full p-[3px] z-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowCreateModal(true);
@@ -219,11 +206,21 @@ const Status = () => {
                   >
                     <FaPlus className="h-2 w-2" />
                   </button>
-                </>
+                </div>
               ) : (
-                <>
+                // Solid green ring when no status
+                <div className="relative w-14 h-14">
+                  <div className="rounded-full p-[3px] bg-green-500">
+                    <div className={`rounded-full p-[2px] ${cardBg}`}>
+                      <img
+                        src={user?.profilePicture}
+                        alt={user?.username}
+                        className="w-11 h-11 rounded-full object-cover block"
+                      />
+                    </div>
+                  </div>
                   <button
-                    className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full p-1 "
+                    className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full p-[3px] z-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowCreateModal(true);
@@ -231,92 +228,50 @@ const Status = () => {
                   >
                     <FaPlus className="h-2 w-2" />
                   </button>
-                </>
+                </div>
               )}
             </div>
 
-            <div className="flex flex-col items-start flex-1">
+            {/* Text */}
+            <div
+              className="flex-1 cursor-pointer"
+              onClick={() =>
+                userStatuses ? handleStatusPreview(userStatuses) : setShowCreateModal(true)
+              }
+            >
               <p className="font-semibold">My Status</p>
-
-              <p
-                className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
-              >
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 {userStatuses
                   ? `${userStatuses.statuses.length} status${userStatuses.statuses.length > 1 ? 'es' : ''} · ${formatTimestamp(userStatuses.statuses[userStatuses.statuses.length - 1].timestamp)}`
                   : 'Tap to add status update'}
               </p>
             </div>
-
-            {userStatuses && (
-              <button
-                className="ml-auto"
-                onClick={() => setShowOption(!showOption)}
-              >
-                <FaEllipsisH
-                  className={`h-5 w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
-                />
-              </button>
-            )}
           </div>
 
-          {/* options menu */}
-          {showOption && userStatuses && (
-            <div
-              className={` shadow-md p-2 ${theme === 'dark' ? 'bg-[rgb(17,27,33)]' : 'bg-white'}`}
-            >
-              <button
-                className="w-full  text-left text-green-500 py-2 hover:bg-gray-100 rounded flex items-center px-2"
-                onClick={() => {
-                  setShowCreateModal(true);
-                  setShowOption(false);
-                }}
-              >
-                <FaCamera className="inline-block mr-2" />
-                Add Status
-              </button>
-
-              <button
-                className="w-full  text-left text-blue-500 py-2 hover:bg-gray-100 rounded px-2"
-                onClick={() => {
-                  handleStatusPreview(userStatuses);
-                  setShowOption(false);
-                }}
-              >
-                {/* <FaEye className="inline-block mr-2" /> */}
-                View Status
-              </button>
-            </div>
-          )}
-
+          {/* Loading */}
           {loading && (
             <div className="flex justify-center items-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500" />
             </div>
           )}
 
-          {/* Recent updates from other  users */}
-
+          {/* Other statuses */}
           {!loading && otherStatuses.length > 0 && (
-            <div
-              className={`p-4 space-y-4 mt-4 shadow-md ${theme === 'dark' ? 'bg-[rgb(17,27,33)]' : 'bg-white'}`}
-            >
-              <h3
-                className={`font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
-              >
+            <div className={`mt-2 ${cardBg}`}>
+              <p className={`px-4 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 Recent updates
-              </h3>
+              </p>
               {otherStatuses.map((contact, index) => (
                 <React.Fragment key={contact.id}>
-                  <StatusList
-                    contact={contact}
-                    onPreview={() => handleStatusPreview(contact)}
-                    theme={theme}
-                  />
-
-                  {index < otherStatuses.length - 1 && (
-                    <hr
-                      className={` ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}
+                  <div className="px-3">
+                    <StatusList
+                      contact={contact}
+                      onPreview={() => handleStatusPreview(contact)}
+                      theme={theme}
                     />
+                  </div>
+                  {index < otherStatuses.length - 1 && (
+                    <hr className={`mx-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`} />
                   )}
                 </React.Fragment>
               ))}
@@ -324,66 +279,33 @@ const Status = () => {
           )}
 
           {/* Empty state */}
-
           {!loading && otherStatuses.length === 0 && (
-            <div className="flex flex-col items-center justify-center pt-8 text-center">
-              <div
-                className={`text-6xl mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`}
-              >
-                📱
-              </div>
-              <h3
-                className={`text-lg mb-2 font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
-              >
-                No statuses to display
+            <div className="flex flex-col items-center justify-center pt-12 text-center px-8">
+              <div className="text-6xl mb-4">📱</div>
+              <h3 className={`text-lg mb-1 font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                No status updates
               </h3>
-
-              <p
-                className={`text-sm  ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}
-              >
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                 Be the first to share a status update
               </p>
             </div>
           )}
         </div>
 
+        {/* Create Status Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div
-              className={`p-6 rounded-lg max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-gray-300' : 'bg-white'}`}
-            >
-              <h3
-                className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-              >
+            <div className={`p-6 rounded-xl max-w-md w-full mx-4 shadow-xl ${theme === 'dark' ? 'bg-[rgb(17,27,33)]' : 'bg-white'}`}>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
                 Create Status
               </h3>
 
               {filePreview && (
-                <div className="mb-4">
-                  {filePreview.type?.startsWith('video/') ? (
-                    <video
-                      src={filePreview.url}
-                      controls
-                      className="w-full h-32 object-cover rounded "
-                    />
-                  ) : filePreview.type?.startsWith('image/') ? (
-                    <img
-                      src={filePreview.url}
-                      alt="file-preview"
-                      className="w-full h-32 object-cover rounded "
-                    />
+                <div className="mb-4 rounded-lg overflow-hidden">
+                  {selectedFile?.type.startsWith('video/') ? (
+                    <video src={filePreview} controls className="w-full h-40 object-cover" />
                   ) : (
-                    <div
-                      className={`w-80 flex flex-col items-center justify-center p-4 rounded shadow-lg mx-auto border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-100 border-gray-200 text-black'}`}
-                    >
-                      <FaFile className="h-12 w-12 text-blue-500 mb-2" />
-                      <span className="text-sm font-semibold truncate max-w-full text-center">
-                        {filePreview.name}
-                      </span>
-                      <span className="text-xs text-gray-500 mt-1">
-                        {(filePreview.size / 1024).toFixed(1)} KB
-                      </span>
-                    </div>
+                    <img src={filePreview} alt="preview" className="w-full h-40 object-cover" />
                   )}
                 </div>
               )}
@@ -392,13 +314,20 @@ const Status = () => {
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
                 placeholder="What's on your mind?"
-                className={`w-full p-3 border rounded-lg mb-4 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-black'}`}
+                className={`w-full p-3 border rounded-lg mb-4 resize-none ${
+                  theme === 'dark'
+                    ? 'bg-[rgb(12,19,24)] border-gray-600 text-white placeholder-gray-500'
+                    : 'bg-gray-50 border-gray-200 text-black'
+                }`}
                 rows={3}
               />
 
               <label
-                className={`flex items-center gap-2 cursor-pointer mb-4 px-4 py-2 rounded-lg border w-fit text-sm font-medium
-                  ${theme === 'dark' ? 'border-gray-600 text-gray-200 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                className={`flex items-center gap-2 cursor-pointer mb-5 px-4 py-2 rounded-lg border w-fit text-sm font-medium ${
+                  theme === 'dark'
+                    ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
                 <FaCamera className="h-4 w-4" />
                 {selectedFile ? selectedFile.name : 'Choose Photo / Video'}
@@ -410,7 +339,7 @@ const Status = () => {
                 />
               </label>
 
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end gap-3">
                 <button
                   onClick={() => {
                     setShowCreateModal(false);
@@ -418,18 +347,16 @@ const Status = () => {
                     setSelectedFile(null);
                     setFilePreview(null);
                   }}
-                  disabled={loading}
-                  className="px-4 py-2  text-gray-500 hover:text-gray-700"
+                  className={`px-4 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-black'}`}
                 >
                   Cancel
                 </button>
-
                 <button
                   onClick={handleCreateStatus}
                   disabled={loading || (!newStatus.trim() && !selectedFile)}
-                  className="px-4 py-2  text-white bg-green-500 rounded hover:bg-green-600 disabled:opacity-50"
+                  className="px-4 py-2 text-white bg-green-500 rounded-lg text-sm hover:bg-green-600 disabled:opacity-50"
                 >
-                  {loading ? 'Creating...' : 'Create'}
+                  {loading ? 'Creating...' : 'Share'}
                 </button>
               </div>
             </div>
