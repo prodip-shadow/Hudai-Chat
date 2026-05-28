@@ -174,25 +174,11 @@ const Status = () => {
                       );
                     })}
                   </svg>
-                  <button
-                    className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full p-0.75 z-10"
-                    onClick={(e) => { e.stopPropagation(); setShowCreator(true); }}>
-                    <FaPlus className="h-2 w-2" />
-                  </button>
                 </div>
               ) : (
                 <div className="relative w-14 h-14">
-                  <div className="rounded-full p-0.75 bg-green-500">
-                    <div className={`rounded-full p-0.5 ${cardBg}`}>
-                      <img src={user?.profilePicture} alt={user?.username}
-                        className="w-11 h-11 rounded-full object-cover block" />
-                    </div>
-                  </div>
-                  <button
-                    className="absolute bottom-0 right-0 bg-green-500 text-white rounded-full p-0.75 z-10"
-                    onClick={(e) => { e.stopPropagation(); setShowCreator(true); }}>
-                    <FaPlus className="h-2 w-2" />
-                  </button>
+                  <img src={user?.profilePicture} alt={user?.username}
+                    className="w-14 h-14 rounded-full object-cover" />
                 </div>
               )}
             </div>

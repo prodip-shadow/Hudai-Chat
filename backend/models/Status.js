@@ -9,6 +9,7 @@ const statusSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+statusSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Status = mongoose.model('Status', statusSchema);
 module.exports = Status;
