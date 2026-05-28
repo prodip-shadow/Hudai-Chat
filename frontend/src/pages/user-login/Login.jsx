@@ -112,6 +112,8 @@ export const Login = () => {
 
       if (res.status === 'success') {
         toast.success('OTP verified!');
+        const token = res.data?.token;
+        localStorage.setItem('auth_token', token);
         const user = res.data?.user;
         if (user?.username && user?.profilePicture) {
           setUser(user);
