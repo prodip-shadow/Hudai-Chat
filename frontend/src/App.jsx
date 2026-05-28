@@ -13,32 +13,36 @@ import { Layout } from './components/Layout.jsx';
 import useUserStore from './store/useUserStore.js';
 import { disconnectSocket, initializeSocket } from './services/chat.service.js';
 import { useChatStore } from './store/chatStore.js';
+import useFriendStore from './store/useFriendStore.js';
+import AddFriends from './pages/FriendSection/AddFriends.jsx';
+import FriendRequests from './pages/FriendSection/FriendRequests.jsx';
+import AllFriends from './pages/FriendSection/AllFriends.jsx';
 
 const App = () => {
 
   const { user } = useUserStore();
   const { setCurrentUser, initsocketListners, cleanUP } = useChatStore();
-  
+  const { initFriendSocket, cleanupFriendSocket } = useFriendStore();
+
   useEffect(() => {
     if (user?._id) {
       const socket = initializeSocket();
 
-
-      if (socket) { 
-        setCurrentUser(user); 
+      if (socket) {
+        setCurrentUser(user);
         initsocketListners(socket);
+        initFriendSocket();
       }
 
     }
-    
-    return () => { 
+
+    return () => {
       cleanUP();
+      cleanupFriendSocket();
       disconnectSocket();
     }
 
-
-
-  },[cleanUP, initsocketListners, setCurrentUser, user]);
+  },[cleanUP, cleanupFriendSocket, initFriendSocket, initsocketListners, setCurrentUser, user]);
 
 
   return (
@@ -55,6 +59,9 @@ const App = () => {
               <Route path="/" element={<HomePage />} />
               <Route path="/user-profile" element={<UserDetails />} />
               <Route path="/setting" element={<Setting />} />
+              <Route path="/add-friends" element={<AddFriends />} />
+              <Route path="/friend-requests" element={<FriendRequests />} />
+              <Route path="/all-friends" element={<AllFriends />} />
             </Route>
             <Route path="/status" element={<Status />} />
           </Route>

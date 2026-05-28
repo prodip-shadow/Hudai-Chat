@@ -1,7 +1,7 @@
 const { uploadFileToCloudinary } = require('../config/cloudinaryConfig');
 const Status = require('../models/Status');
+const User = require('../models/User');
 const response = require('../utils/responceHandler');
-const Message = require('../models/Message');
 
 const normalizeUploadedUrl = (url, req) => {
   if (!url) {
@@ -60,13 +60,13 @@ exports.createStatus = async (req, res) => {
       .populate('user', 'username profilePicture')
       .populate('viewers', 'username profilePicture');
 
-    //   emit socket events
-    if (req.io && req.socketUserMap) {
-      // Broadcast the new status to all connected clients except the sender
-      for (const [connectedUserId, socketId] of req.socketUserMap) {
-        if (connectedUserId !== userId) {
-          req.io.to(socketId).emit('new_status', populatedStatus);
-        }
+    // Emit new status only to friends
+    if (req.io) {
+      const me = await User.findById(userId).select('friends');
+      if (me) {
+        me.friends.forEach((friendId) => {
+          req.io.to(friendId.toString()).emit('new_status', populatedStatus);
+        });
       }
     }
 
@@ -78,13 +78,19 @@ exports.createStatus = async (req, res) => {
 };
 
 exports.getStatuses = async (req, res) => {
+  const userId = req.user.userId;
   try {
+    const me = await User.findById(userId).select('friends');
+    const allowedUserIds = [userId, ...(me?.friends.map((id) => id.toString()) || [])];
+
     const statuses = await Status.find({
       expiresAt: { $gt: new Date() },
+      user: { $in: allowedUserIds },
     })
       .populate('user', 'username profilePicture')
       .populate('viewers', 'username profilePicture')
       .sort({ createdAt: -1 });
+
     return response(res, 200, 'Statuses retrieved successfully', statuses);
   } catch (error) {
     console.error(error);
@@ -125,7 +131,7 @@ exports.viewStatus = async (req, res) => {
       if (statusOwnerSocketId) {
         const viewData = {
           statusId,
-          viewerId,
+          viewerId: userId,
           totalViewers: updatedStatus.viewers.length,
           viewers: updatedStatus.viewers,
         };
@@ -158,13 +164,13 @@ exports.deleteStatus = async (req, res) => {
 
     await status.deleteOne();
 
-    //   emit socket events
-    if (req.io && req.socketUserMap) {
-      // Broadcast the new status to all connected clients except the sender
-      for (const [connectedUserId, socketId] of req.socketUserMap) {
-        if (connectedUserId !== userId) {
-          req.io.to(socketId).emit('status_deleted', statusId);
-        }
+    // Emit deletion only to friends
+    if (req.io) {
+      const me = await User.findById(userId).select('friends');
+      if (me) {
+        me.friends.forEach((friendId) => {
+          req.io.to(friendId.toString()).emit('status_deleted', statusId);
+        });
       }
     }
 

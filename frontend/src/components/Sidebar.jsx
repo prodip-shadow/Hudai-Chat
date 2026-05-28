@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import useThemeStore from '../store/themeStore';
 import useUserStore from '../store/useUserStore';
 import useLayoutStore from '../store/layoutStore';
-import { FaWhatsapp,FaUserCircle, FaCog } from 'react-icons/fa';
+import useFriendStore from '../store/useFriendStore';
+import { FaUserCircle, FaCog, FaUserPlus, FaUserFriends, FaBell } from 'react-icons/fa';
 import { MdRadioButtonChecked } from 'react-icons/md';
 import { motion } from 'framer-motion';
 import Logo from '../images/logo.png';
@@ -12,9 +13,10 @@ import Logo from '../images/logo.png';
 const Sidebar = () => {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const { theme, setTheme } = useThemeStore();
+  const { theme } = useThemeStore();
   const { user } = useUserStore();
   const { activeTab, setActiveTab, selectedContact } = useLayoutStore();
+  const { receivedCount } = useFriendStore();
 
   useEffect(() => {
     const handleResize = () => {
@@ -35,63 +37,71 @@ const Sidebar = () => {
       setActiveTab('profile');
     } else if (location.pathname === '/setting') {
       setActiveTab('setting');
+    } else if (location.pathname === '/add-friends') {
+      setActiveTab('add-friends');
+    } else if (location.pathname === '/friend-requests') {
+      setActiveTab('friend-requests');
+    } else if (location.pathname === '/all-friends') {
+      setActiveTab('all-friends');
     }
   }, [location, setActiveTab]);
 
   if (isMobile && selectedContact) {
-    return null; // hide sidebar on mobile when a contact is selected
+    return null;
   }
+
+  const iconClass = (tab) =>
+    `h-6 w-6 ${activeTab === tab ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`;
+
+  const linkClass = (tab) =>
+    `${isMobile ? '' : 'mb-8'} relative ${activeTab === tab ? 'bg-gray-300 shadow-sm p-2 rounded-full' : ''} focus:outline-none`;
 
   const SidebarContent = (
     <>
-      <Link
-        to={'/'}
-        className={`${isMobile ? '' : 'mb-8'} ${activeTab === 'chats' && 'bg-gray-300 shadow-sm  p-2 rounded-full'} focus:outline-none`}
-      >
-        {/* <FaWhatsapp
-          className={`h-6 w-6 ${activeTab === 'chats' ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
-        /> */}
-        <img
-          src={Logo}
-          className={`h-6 w-6 ${activeTab === 'chats' ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
-          alt="Logo"
-        />
+      {/* Chats */}
+      <Link to={'/'} className={linkClass('chats')}>
+        <img src={Logo} className={iconClass('chats')} alt="Logo" />
       </Link>
 
-      <Link
-        to={'/status'}
-        className={`${isMobile ? '' : 'mb-8'} ${activeTab === 'status' && 'bg-gray-300 shadow-sm  p-2 rounded-full'} focus:outline-none`}
-      >
-        <MdRadioButtonChecked
-          className={`h-6 w-6 ${activeTab === 'status' ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
-        />
+      {/* Status */}
+      <Link to={'/status'} className={linkClass('status')}>
+        <MdRadioButtonChecked className={iconClass('status')} />
       </Link>
-      {!isMobile && <div className="grow" />}
 
-      <Link
-        to={'/user-profile'}
-        className={`${isMobile ? '' : 'mb-8'} ${activeTab === 'profile' && 'bg-gray-300 shadow-sm  p-2 rounded-full'} focus:outline-none`}
-      >
-        {user?.profilePicture ? (
-          <img
-            src={user.profilePicture}
-            alt="User"
-            className="h-6 w-6 rounded-full"
-          />
-        ) : (
-          <FaUserCircle
-            className={`h-6 w-6 ${activeTab === 'profile' ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
-          />
+      {/* Add Friends */}
+      <Link to={'/add-friends'} className={linkClass('add-friends')}>
+        <FaUserPlus className={iconClass('add-friends')} />
+      </Link>
+
+      {/* Friend Requests (with badge) */}
+      <Link to={'/friend-requests'} className={linkClass('friend-requests')}>
+        <FaBell className={iconClass('friend-requests')} />
+        {receivedCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-4 h-4 flex items-center justify-center bg-green-500 text-white text-[10px] font-bold rounded-full px-0.5">
+            {receivedCount > 99 ? '99+' : receivedCount}
+          </span>
         )}
       </Link>
 
-      <Link
-        to={'/setting'}
-        className={`${isMobile ? '' : 'mb-8'} ${activeTab === 'setting' && 'bg-gray-300 shadow-sm  p-2 rounded-full'} focus:outline-none`}
-      >
-        <FaCog
-          className={`h-6 w-6 ${activeTab === 'setting' ? (theme === 'dark' ? 'text-gray-800' : '') : theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
-        />
+      {/* All Friends */}
+      <Link to={'/all-friends'} className={linkClass('all-friends')}>
+        <FaUserFriends className={iconClass('all-friends')} />
+      </Link>
+
+      {!isMobile && <div className="grow" />}
+
+      {/* Profile */}
+      <Link to={'/user-profile'} className={linkClass('profile')}>
+        {user?.profilePicture ? (
+          <img src={user.profilePicture} alt="User" className="h-6 w-6 rounded-full" />
+        ) : (
+          <FaUserCircle className={iconClass('profile')} />
+        )}
+      </Link>
+
+      {/* Settings */}
+      <Link to={'/setting'} className={linkClass('setting')}>
+        <FaCog className={iconClass('setting')} />
       </Link>
     </>
   );

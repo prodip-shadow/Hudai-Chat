@@ -164,7 +164,7 @@ export const useChatStore = create(
     fetchContacts: async () => {
         set({ loading: true, error: null });
         try {
-            const { data } = await axiosInstance.get('/auth/users');
+            const { data } = await axiosInstance.get('/friends/contacts');
             set({ contacts: data.data || data, loading: false });
             get().initsocketListners();
             return data;

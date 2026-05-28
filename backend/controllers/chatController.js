@@ -2,6 +2,7 @@ const { uploadFileToCloudinary } = require('../config/cloudinaryConfig');
 const Conversation = require('../models/Conversation');
 const response = require('../utils/responceHandler');
 const Message = require('../models/Message');
+const User = require('../models/User');
 
 const normalizeUploadedUrl = (url, req) => {
   if (!url) {
@@ -19,6 +20,12 @@ exports.sendMessage = async (req, res) => {
   try {
     let { senderId, receiverId, content, messageStatus } = req.body;
     const file = req.file;
+
+    // Friendship check
+    const sender = await User.findById(senderId).select('friends');
+    if (!sender || !sender.friends.map(String).includes(String(receiverId))) {
+      return response(res, 403, 'You can only message your friends');
+    }
 
     const participants = [senderId, receiverId].sort();
 

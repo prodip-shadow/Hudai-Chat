@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     isOnline: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
     agreed: { type: Boolean, default: false },
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 

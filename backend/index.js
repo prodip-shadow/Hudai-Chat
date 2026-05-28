@@ -10,6 +10,7 @@ const authRoute = require('./routes/authRoute');
 const chatRoute = require('./routes/chatRoute');
 const http = require('http');
 const statusRoute = require('./routes/statusRoute');
+const friendRoute = require('./routes/friendRoute');
 const initializeSocket = require('./services/socketService');
 const path = require('path');
 
@@ -47,6 +48,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoute);
 app.use('/api/chats', chatRoute);
 app.use('/api/status', statusRoute);
+app.use('/api/friends', friendRoute);
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
