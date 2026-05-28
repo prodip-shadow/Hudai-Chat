@@ -29,6 +29,10 @@ const sendOtpToEmail = async (email, otp) => {
     </div>
   `;
 
+
+
+
+  
   const payload = JSON.stringify({
     sender: { email: process.env.EMAIL_SENDER },
     to: [{ email }],
